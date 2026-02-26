@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error(err); }
     });
 
-    // Question Form
+    // Question Form Submit (Create or Update)
     document.getElementById('question-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const qId = document.getElementById('q-id').value;
         const body = {
             lesson_id: document.getElementById('q-les-id').value || null,
             module_id: document.getElementById('q-mod-id').value || null,
@@ -180,15 +181,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const res = await fetchWithAuth('/questions', {
-                method: 'POST',
+            const url = qId ? `/questions/${qId}` : '/questions';
+            const method = qId ? 'PUT' : 'POST';
+
+            const res = await fetchWithAuth(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             if (res.ok) {
-                alert('Pergunta salva com sucesso!');
+                alert(`Pergunta ${qId ? 'atualizada' : 'salva'} com sucesso!`);
                 document.getElementById('question-modal').classList.add('hidden');
                 document.getElementById('question-form').reset();
+                document.getElementById('q-id').value = '';
+
+                // Refresh the list if it's open
+                if (!document.getElementById('question-list-modal').classList.contains('hidden')) {
+                    openQuestionListModal(body.lesson_id, body.module_id);
+                }
             } else {
                 alert('Erro ao salvar pergunta');
             }
@@ -235,7 +245,7 @@ async function loadModules() {
                     <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2 mb-2">
                         <h3 class="font-bold text-lg dark:text-gray-100">${m.title}</h3>
                         <div class="space-x-2">
-                            <button onclick="openQuestionModal(null, ${m.id})" class="text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded hover:bg-green-200 dark:hover:bg-green-800 transition">+ Avaliação do Módulo</button>
+                            <button onclick="openQuestionListModal(null, ${m.id})" class="text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded hover:bg-green-200 dark:hover:bg-green-800 transition">Avaliações do Módulo</button>
                             <button onclick="openLessonModal(${m.id})" class="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition">+ Nova Aula</button>
                         </div>
                     </div>
@@ -243,7 +253,7 @@ async function loadModules() {
                         ${m.lessons.map(l => `
                             <li class="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded transition-colors duration-200">
                                 <span class="dark:text-gray-200">- ${l.title}</span>
-                                <button onclick="openQuestionModal(${l.id}, ${m.id})" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">+ Add Pergunta</button>
+                                <button onclick="openQuestionListModal(${l.id}, ${m.id})" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Ver Perguntas</button>
                             </li>
                         `).join('')}
                     </ul>
@@ -390,9 +400,86 @@ function openLessonModal(moduleId) {
 
 function openQuestionModal(lessonId, moduleId) {
     document.getElementById('question-form').reset();
+    document.getElementById('q-id').value = '';
     document.getElementById('q-les-id').value = lessonId || '';
     document.getElementById('q-mod-id').value = moduleId || '';
+    document.getElementById('q-modal-title').textContent = 'Adicionar Pergunta';
     document.getElementById('question-modal').classList.remove('hidden');
+}
+
+async function openQuestionListModal(lessonId, moduleId) {
+    document.getElementById('ql-current-les').value = lessonId || '';
+    document.getElementById('ql-current-mod').value = moduleId || '';
+
+    let url = '';
+    if (lessonId) url = `/questions/lesson/${lessonId}`;
+    else if (moduleId) url = `/questions/module/${moduleId}`;
+
+    if (!url) return;
+
+    try {
+        const res = await fetchWithAuth(url);
+        const container = document.getElementById('question-list-container');
+        if (res.ok) {
+            const questions = await res.json();
+            if (questions.length === 0) {
+                container.innerHTML = '<li class="text-gray-500 py-4 text-center border rounded dark:border-gray-700">Nenhuma pergunta cadastrada.</li>';
+            } else {
+                container.innerHTML = questions.map((q, idx) => `
+                    <li class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors duration-200">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-1">Q${idx + 1}: ${q.question_text}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">
+                                <span class="${q.correct_option === 'A' ? 'text-green-600 font-bold dark:text-green-400' : ''}">A) ${q.option_a}</span><br>
+                                <span class="${q.correct_option === 'B' ? 'text-green-600 font-bold dark:text-green-400' : ''}">B) ${q.option_b}</span><br>
+                                <span class="${q.correct_option === 'C' ? 'text-green-600 font-bold dark:text-green-400' : ''}">C) ${q.option_c}</span><br>
+                                <span class="${q.correct_option === 'D' ? 'text-green-600 font-bold dark:text-green-400' : ''}">D) ${q.option_d}</span>
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editQuestion('${encodeURIComponent(JSON.stringify(q))}')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">Editar</button>
+                            <button onclick="deleteQuestion(${q.id}, ${lessonId}, ${moduleId})" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition">Excluir</button>
+                        </div>
+                    </li>
+                `).join('');
+            }
+            document.getElementById('question-list-modal').classList.remove('hidden');
+        } else {
+            alert('Erro ao carregar perguntas');
+        }
+    } catch (err) { console.error(err); }
+}
+
+function editQuestion(encodedQuestionData) {
+    const q = JSON.parse(decodeURIComponent(encodedQuestionData));
+    document.getElementById('question-form').reset();
+    document.getElementById('q-id').value = q.id;
+    document.getElementById('q-les-id').value = q.lesson_id || '';
+    document.getElementById('q-mod-id').value = q.module_id || '';
+    document.getElementById('q-text').value = q.question_text;
+    document.getElementById('q-opt-a').value = q.option_a;
+    document.getElementById('q-opt-b').value = q.option_b;
+    document.getElementById('q-opt-c').value = q.option_c;
+    document.getElementById('q-opt-d').value = q.option_d;
+
+    const correctRadio = document.querySelector(`input[name="q-correct"][value="${q.correct_option}"]`);
+    if (correctRadio) correctRadio.checked = true;
+
+    document.getElementById('q-modal-title').textContent = 'Editar Pergunta';
+    document.getElementById('question-modal').classList.remove('hidden');
+}
+
+async function deleteQuestion(id, lessonId, moduleId) {
+    if (!confirm('Tem certeza que deseja excluir esta pergunta?')) return;
+    try {
+        const res = await fetchWithAuth(`/questions/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert('Pergunta excluída com sucesso!');
+            openQuestionListModal(lessonId, moduleId);
+        } else {
+            alert('Erro ao excluir a pergunta.');
+        }
+    } catch (err) { console.error(err); }
 }
 
 let chartInstance1 = null;

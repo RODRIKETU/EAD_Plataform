@@ -153,3 +153,52 @@ exports.getAllGrades = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch student grades' });
     }
 };
+
+/**
+ * @swagger
+ * /api/questions/{id}:
+ *   put:
+ *     summary: Update an existing question
+ *     security:
+ *       - bearerAuth: []
+ *       - ApiKeyAuth: []
+ */
+exports.updateQuestion = async (req, res) => {
+    try {
+        const { question_text, option_a, option_b, option_c, option_d, correct_option } = req.body;
+        const [result] = await db.query(
+            `UPDATE questions 
+             SET question_text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_option = ?, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ?`,
+            [question_text, option_a, option_b, option_c, option_d, correct_option, req.params.id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Question not found' });
+        }
+        res.json({ message: 'Question updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
+ * @swagger
+ * /api/questions/{id}:
+ *   delete:
+ *     summary: Delete a question
+ *     security:
+ *       - bearerAuth: []
+ *       - ApiKeyAuth: []
+ */
+exports.deleteQuestion = async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM questions WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Question not found' });
+        }
+        res.json({ message: 'Question deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

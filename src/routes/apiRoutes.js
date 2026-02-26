@@ -72,6 +72,8 @@ router.post('/progress/:lessonId', courseController.markLessonCompleted);
 
 // Quizzes and Questions
 router.post('/questions', teacherMiddleware, quizController.addQuestion);
+router.put('/questions/:id', teacherMiddleware, quizController.updateQuestion);
+router.delete('/questions/:id', teacherMiddleware, quizController.deleteQuestion);
 router.get('/questions/lesson/:lessonId', quizController.getQuestionsForLesson); // Accessible by student
 router.get('/questions/module/:moduleId', quizController.getQuestionsForModule); // Accessible by student
 router.post('/quiz/submit', quizController.submitQuiz); // Accessible by student
