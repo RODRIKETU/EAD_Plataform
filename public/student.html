@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Aluno</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --secondary-color: #4338CA;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img class="h-8 w-auto dynamic-logo" src="https://via.placeholder.com/150x50" alt="Logo">
+                    <span class="ml-4 font-bold text-xl dynamic-title">EAD</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/profile.html" class="text-gray-500 hover:text-gray-700">Meu Perfil</a>
+                    <button id="logout-btn" class="text-red-500 hover:text-red-700">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex-1 max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Sidebar Navigation -->
+        <div class="bg-white shadow rounded-lg p-4 h-fit space-y-4">
+            <div>
+                <h3 class="font-bold text-lg mb-2 border-b pb-2">Meu Curso</h3>
+                <div id="course-navigation" class="space-y-2">
+                    <!-- Modules and Lessons will be injected here -->
+                </div>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg mb-2 border-b pb-2">Ações</h3>
+                <button onclick="showFinance()"
+                    class="w-full text-left px-2 py-1 hover:bg-gray-50 rounded">Financeiro</button>
+            </div>
+        </div>
+
+        <!-- Main Content (Video Player) -->
+        <div id="main-content" class="col-span-3 bg-white shadow rounded-lg p-6">
+            <h2 id="lesson-title" class="text-2xl font-bold mb-4">Selecione uma aula</h2>
+
+            <div id="video-container" class="aspect-w-16 aspect-h-9 bg-black mb-4 hidden rounded overflow-hidden">
+                <video id="video-player" controls class="w-full h-full" controlsList="nodownload"></video>
+            </div>
+
+            <div id="lesson-actions" class="flex justify-between items-center hidden mt-6 pt-4 border-t">
+                <a id="btn-support-material" href="#" target="_blank" class="hidden text-primary underline">Baixar
+                    Material de Apoio (PDF)</a>
+                <button id="btn-mark-completed" class="bg-primary text-white px-4 py-2 rounded">Marcar como
+                    Concluída</button>
+            </div>
+
+            <!-- Finance View -->
+            <div id="finance-view" class="hidden">
+                <h2 class="text-xl font-bold mb-4">Minhas Faturas</h2>
+                <div id="my-charges" class="space-y-4">
+                    <!-- Charges injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-[32rem] shadow-lg rounded-md bg-white">
+            <h3 id="quiz-modal-title" class="text-xl font-bold mb-4">Quiz</h3>
+            <div id="quiz-container" class="space-y-6">
+                <!-- Questions injected here -->
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeQuizModal()"
+                    class="px-4 py-2 text-gray-700 bg-gray-200 rounded mr-2">Cancelar</button>
+                <button id="btn-submit-quiz" class="px-4 py-2 bg-primary text-white rounded">Enviar Respostas</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/video-player.js"></script>
+    <script src="/js/student.js"></script>
+</body>
+
+</html>

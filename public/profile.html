@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --secondary-color: #4338CA;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img class="h-8 w-auto dynamic-logo" src="https://via.placeholder.com/150x50" alt="Logo">
+                    <span class="ml-4 font-bold text-xl dynamic-title">EAD</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="javascript:history.back()" class="text-gray-500 hover:text-gray-700">Voltar</a>
+                    <button id="logout-btn" class="text-red-500 hover:text-red-700">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold mb-6">Meu Perfil</h1>
+
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-medium mb-4">Dados Pessoais</h2>
+            <form id="profile-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nome</label>
+                    <input type="text" id="profile-name"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="profile-email"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nova Senha (deixe em branco para não
+                        alterar)</label>
+                    <input type="password" id="profile-password"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                </div>
+                <button type="submit" class="bg-primary text-white px-4 py-2 rounded">Salvar Alterações</button>
+            </form>
+        </div>
+
+        <div id="admin-api-section" class="bg-white shadow rounded-lg p-6 hidden">
+            <h2 class="text-lg font-medium mb-4">Integração API (Admin)</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Token de API Atual</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input type="text" id="api-token" readonly
+                            class="flex-1 block w-full border-gray-300 rounded-l-md sm:text-sm bg-gray-50 py-2 px-3"
+                            value="Carregando...">
+                        <button id="generate-token-btn"
+                            class="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-100 text-gray-700 hover:bg-gray-200">
+                            Gerar Novo Token
+                        </button>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">Use este token no header <code
+                            class="bg-gray-100 px-1 rounded">x-api-token</code> para integrar sistemas externos.</p>
+                </div>
+
+                <div class="pt-4 border-t border-gray-200">
+                    <a href="/api-docs" target="_blank"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                        Acessar Documentação da API (Swagger)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+
+</html>
