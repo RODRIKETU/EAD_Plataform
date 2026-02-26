@@ -55,6 +55,10 @@ router.get('/dashboard/metrics', teacherMiddleware, dashboardController.getMetri
 // API Token management
 router.post('/user/generate-token', superAdminMiddleware, userController.generateToken);
 
+// Student Management (Teacher & Coordinator & Admin)
+router.get('/students', teacherMiddleware, userController.getStudents);
+router.get('/students/:id/details', teacherMiddleware, userController.getStudentDetails);
+
 // Course Management (Teacher & Coordinator & Admin)
 router.post('/modules', coordinatorMiddleware, courseController.createModule);
 router.get('/modules', courseController.getModules); // Accessible by everyone (student included)

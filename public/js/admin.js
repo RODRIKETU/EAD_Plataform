@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     loadModules();
     loadGrades();
+    loadStudents();
 
     // Module Form
     document.getElementById('module-form').addEventListener('submit', async (e) => {
@@ -201,11 +202,13 @@ function showTab(tab) {
     document.getElementById('tab-grades').classList.add('hidden');
     document.getElementById('tab-finance').classList.add('hidden');
     document.getElementById('tab-settings').classList.add('hidden');
+    const tabStudents = document.getElementById('tab-students');
+    if (tabStudents) tabStudents.classList.add('hidden');
 
     document.getElementById(`tab-${tab}`).classList.remove('hidden');
 
     // Reset button styles
-    ['btn-dashboard', 'btn-courses', 'btn-grades', 'btn-finance', 'btn-settings'].forEach(id => {
+    ['btn-dashboard', 'btn-courses', 'btn-grades', 'btn-finance', 'btn-settings', 'btn-students'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
             btn.classList.remove('bg-gray-100', 'text-gray-800');
@@ -291,6 +294,78 @@ async function loadGrades() {
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(g.created_at).toLocaleDateString()}</td>
                 </tr>
             `).join('');
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function loadStudents() {
+    try {
+        const res = await fetchWithAuth('/students');
+        if (res.ok) {
+            const students = await res.json();
+            const list = document.getElementById('students-list');
+            if (students.length === 0) {
+                list.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhum aluno encontrado.</td></tr>`;
+                return;
+            }
+            list.innerHTML = students.map(s => `
+                <tr class="transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${s.name}<br><small class="text-gray-500 dark:text-gray-400">${s.email}</small></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${s.cpf || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${new Date(s.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                        <button onclick="viewStudentDetails(${s.id})" class="text-primary hover:underline font-medium">Ver Detalhes</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function viewStudentDetails(studentId) {
+    try {
+        const res = await fetchWithAuth(`/students/${studentId}/details`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('student-modal-name').textContent = data.student.name;
+            document.getElementById('student-modal-email').textContent = data.student.email;
+
+            // Populate Progress
+            const progressList = document.getElementById('st-progress-list');
+            if (data.progress.length === 0) {
+                progressList.innerHTML = '<li class="text-sm text-gray-500 dark:text-gray-400">Nenhuma aula iniciada.</li>';
+            } else {
+                progressList.innerHTML = data.progress.map(p => `
+                    <li class="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-700/50 rounded mb-2">
+                        <span class="dark:text-gray-200"><span class="font-medium">${p.module_title}</span> - ${p.lesson_title}</span>
+                        <span class="${p.is_completed ? 'text-green-600 dark:text-green-400 font-bold' : 'text-yellow-600 dark:text-yellow-400'}">
+                            ${p.is_completed ? 'Concluída' : 'Em andamento'}
+                        </span>
+                    </li>
+                `).join('');
+            }
+
+            // Populate Grades
+            const gradesList = document.getElementById('st-grades-list');
+            if (data.grades.length === 0) {
+                gradesList.innerHTML = '<li class="text-sm text-gray-500 dark:text-gray-400">Nenhuma avaliação realizada.</li>';
+            } else {
+                gradesList.innerHTML = data.grades.map(g => `
+                    <li class="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-700/50 rounded mb-2">
+                        <span class="dark:text-gray-200 font-medium">${g.module_title}</span>
+                        <div class="text-right">
+                            <span class="block text-gray-900 dark:text-gray-100 font-bold">${parseFloat(g.grade).toFixed(1)}%</span>
+                            <span class="text-xs ${g.passed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                                ${g.passed ? 'Aprovado' : 'Reprovado'}
+                            </span>
+                        </div>
+                    </li>
+                `).join('');
+            }
+
+            document.getElementById('student-modal').classList.remove('hidden');
+        } else {
+            alert('Erro ao carregar os detalhes do aluno');
         }
     } catch (err) { console.error(err); }
 }
