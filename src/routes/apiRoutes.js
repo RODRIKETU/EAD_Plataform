@@ -13,12 +13,13 @@ const videoController = require('../controllers/video');
 const financeController = require('../controllers/finance');
 const quizController = require('../controllers/quiz');
 const dashboardController = require('../controllers/dashboard');
+const materialsController = require('../controllers/materials');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let folder = 'public/uploads/';
         if (file.fieldname === 'video') folder += 'raw_videos/';
-        else if (file.fieldname === 'pdf') folder += 'materials/';
+        else if (file.fieldname === 'pdf' || file.fieldname === 'material') folder += 'materials/';
         else if (file.fieldname === 'logo') folder += 'logos/';
         else if (file.fieldname === 'login_bg') folder += 'backgrounds/';
         else folder += 'misc/';
@@ -83,5 +84,10 @@ router.get('/grades', teacherMiddleware, quizController.getAllGrades); // Teache
 router.get('/finance', superAdminMiddleware, financeController.getAllCharges);
 router.get('/finance/my', financeController.getMyCharges);
 router.post('/finance/charge', superAdminMiddleware, financeController.createCharge);
+
+// Materials Management
+router.get('/lessons/:lessonId/materials', materialsController.getMaterialsByLesson); // Accessible by student
+router.post('/lessons/:lessonId/materials', teacherMiddleware, upload.single('material'), materialsController.addMaterial);
+router.delete('/materials/:id', teacherMiddleware, materialsController.deleteMaterial);
 
 module.exports = router;

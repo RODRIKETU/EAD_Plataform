@@ -204,6 +204,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) { console.error(err); }
     });
+    // Material Form Submit
+    document.getElementById('material-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('m-file');
+        if (!fileInput.files.length) {
+            alert('Selecione um arquivo PDF!');
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('name', document.getElementById('m-name').value);
+        fd.append('comment', document.getElementById('m-comment').value);
+        fd.append('material', fileInput.files[0]);
+
+        const lessonId = document.getElementById('m-les-id').value;
+
+        try {
+            const res = await fetchWithAuth(`/lessons/${lessonId}/materials`, {
+                method: 'POST',
+                body: fd
+            });
+            if (res.ok) {
+                alert('Material salvo com sucesso!');
+                document.getElementById('material-modal').classList.add('hidden');
+                document.getElementById('material-form').reset();
+
+                // Refresh the list if it's open
+                if (!document.getElementById('materials-list-modal').classList.contains('hidden')) {
+                    openMaterialsListModal(lessonId);
+                }
+            } else {
+                alert('Erro ao salvar material');
+            }
+        } catch (err) { console.error(err); }
+    });
 });
 
 function showTab(tab) {
@@ -253,7 +289,10 @@ async function loadModules() {
                         ${m.lessons.map(l => `
                             <li class="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded transition-colors duration-200">
                                 <span class="dark:text-gray-200">- ${l.title}</span>
-                                <button onclick="openQuestionListModal(${l.id}, ${m.id})" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Ver Perguntas</button>
+                                <div class="space-x-3">
+                                    <button onclick="openQuestionListModal(${l.id}, ${m.id})" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Ver Perguntas</button>
+                                    <button onclick="openMaterialsListModal(${l.id})" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Materiais</button>
+                                </div>
                             </li>
                         `).join('')}
                     </ul>
@@ -594,4 +633,58 @@ function renderCharts(data, role) {
             });
         }
     }
+}
+
+// Materials Functions
+async function openMaterialsListModal(lessonId) {
+    document.getElementById('mat-current-les').value = lessonId;
+
+    // Fetch materials
+    try {
+        const res = await fetchWithAuth(`/lessons/${lessonId}/materials`);
+        if (res.ok) {
+            const materials = await res.json();
+            const container = document.getElementById('materials-list-container');
+
+            if (materials.length === 0) {
+                container.innerHTML = '<li class="text-gray-500 dark:text-gray-400 text-sm">Nenhum material cadastrado para esta aula.</li>';
+            } else {
+                container.innerHTML = materials.map(m => `
+                    <li class="p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between sm:items-center transition-colors duration-200">
+                        <div class="mb-2 sm:mb-0">
+                            <p class="font-bold text-gray-800 dark:text-gray-100">${m.name}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${m.comment || ''}</p>
+                            <a href="${m.file_path}" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold hover:underline mt-2 inline-block">Visualizar Arquivo PDF</a>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="deleteMaterial(${m.id}, ${lessonId})" class="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition">Excluir</button>
+                        </div>
+                    </li>
+                `).join('');
+            }
+
+            document.getElementById('materials-list-modal').classList.remove('hidden');
+        } else {
+            alert('Erro ao carregar materiais');
+        }
+    } catch (err) { console.error(err); }
+}
+
+function openMaterialModal(lessonId) {
+    document.getElementById('m-les-id').value = lessonId;
+    document.getElementById('material-form').reset();
+    document.getElementById('material-modal').classList.remove('hidden');
+}
+
+async function deleteMaterial(id, lessonId) {
+    if (!confirm('Tem certeza que deseja excluir este material?')) return;
+    try {
+        const res = await fetchWithAuth(`/materials/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert('Material excluído com sucesso!');
+            openMaterialsListModal(lessonId);
+        } else {
+            alert('Erro ao excluir material.');
+        }
+    } catch (err) { console.error(err); }
 }

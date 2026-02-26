@@ -69,7 +69,7 @@ async function loadCourseStructure() {
     } catch (err) { console.error(err); }
 }
 
-function selectLesson(id, moduleId, title, hlsPath, pdfPath) {
+function selectLesson(id, moduleId, title, hlsPath) {
     currentLessonId = id;
     currentModuleId = moduleId;
 
@@ -79,14 +79,35 @@ function selectLesson(id, moduleId, title, hlsPath, pdfPath) {
     document.getElementById('lesson-title').textContent = title;
     document.getElementById('lesson-actions').classList.remove('hidden');
 
-    // Check material
-    const pdfBtn = document.getElementById('btn-support-material');
-    if (pdfPath && pdfPath !== 'null') {
-        pdfBtn.href = pdfPath;
-        pdfBtn.classList.remove('hidden');
-    } else {
-        pdfBtn.classList.add('hidden');
-    }
+    // Fetch and render Support Materials dynamically
+    const materialsList = document.getElementById('materials-list');
+    materialsList.innerHTML = '<span class="text-sm text-gray-400">Carregando materiais...</span>';
+
+    fetchWithAuth(`/lessons/${id}/materials`).then(res => {
+        if (res.ok) {
+            res.json().then(materials => {
+                if (materials.length === 0) {
+                    materialsList.innerHTML = '';
+                    return;
+                }
+
+                materialsList.innerHTML = materials.map(m => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 transition-colors duration-200">
+                        <div>
+                            <p class="font-bold text-gray-800 dark:text-gray-100 text-sm">${m.name}</p>
+                            ${m.comment ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${m.comment}</p>` : ''}
+                        </div>
+                        <a href="${m.file_path}" target="_blank" class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded hover:opacity-80 transition flex-shrink-0 ml-4 font-semibold text-center h-fit">Baixar PDF</a>
+                    </div>
+                `).join('');
+            });
+        } else {
+            materialsList.innerHTML = '<span class="text-sm text-red-400">Erro ao carregar materiais</span>';
+        }
+    }).catch(err => {
+        console.error(err);
+        materialsList.innerHTML = '';
+    });
 
     if (hlsPath && hlsPath !== 'null') {
         playVideo(hlsPath);

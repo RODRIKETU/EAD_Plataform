@@ -59,6 +59,16 @@ async function initDb() {
         FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS support_materials (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        lesson_id INT,
+        name VARCHAR(255) NOT NULL,
+        comment TEXT,
+        file_path VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS questions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         lesson_id INT,
