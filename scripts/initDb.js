@@ -55,6 +55,7 @@ async function initDb() {
         video_hls_path VARCHAR(255),
         support_material_path VARCHAR(255),
         display_order INT DEFAULT 0,
+        min_pass_score INT DEFAULT 70,
         FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
       );
 

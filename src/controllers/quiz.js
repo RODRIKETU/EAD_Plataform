@@ -104,7 +104,15 @@ exports.submitQuiz = async (req, res) => {
         });
 
         const grade = (correctCount / questions.length) * 100;
-        const passed = grade >= 70; // Hardcoded pass threshold of 70%
+        let passed = false;
+
+        if (lesson_id) {
+            const [lesson] = await db.query('SELECT min_pass_score FROM lessons WHERE id = ?', [lesson_id]);
+            const minScore = lesson.length > 0 && lesson[0].min_pass_score !== null ? lesson[0].min_pass_score : 70;
+            passed = grade >= minScore;
+        } else {
+            passed = grade >= 70; // Static module threshold for now
+        }
 
         if (module_id && !lesson_id) {
             // Save module final grade

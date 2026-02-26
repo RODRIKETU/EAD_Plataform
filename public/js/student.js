@@ -218,12 +218,16 @@ async function submitQuiz() {
 
         if (res.ok) {
             const result = await res.json();
-            alert(`Você acertou ${result.correct} de ${result.total} perguntas. Nota: ${result.score.toFixed(1)}%`);
 
-            closeQuizModal();
-
-            if (typeContext === 'lesson') {
-                completeLesson(idContext);
+            if (result.passed) {
+                alert(`Parabéns! Você acertou ${result.correct} de ${result.total} perguntas. Nota: ${result.score.toFixed(1)}%`);
+                closeQuizModal();
+                if (typeContext === 'lesson') {
+                    completeLesson(idContext);
+                }
+            } else {
+                alert(`Você acertou ${result.correct} de ${result.total} perguntas. Nota: ${result.score.toFixed(1)}%.\nVocê não atingiu a pontuação mínima necessária para concluir. Tente novamente.`);
+                closeQuizModal();
             }
         }
     } catch (err) { console.error(err); }
