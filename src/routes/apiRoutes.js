@@ -12,6 +12,7 @@ const courseController = require('../controllers/course');
 const videoController = require('../controllers/video');
 const financeController = require('../controllers/finance');
 const quizController = require('../controllers/quiz');
+const dashboardController = require('../controllers/dashboard');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -47,6 +48,9 @@ router.put('/profile', userController.updateProfile);
 // Admin Only Settings
 router.put('/settings', superAdminMiddleware, upload.single('logo'), settingsController.updateSettings);
 
+// Dashboards (Accessible to professor, coordinator, and super_admin via teacherMiddleware baseline)
+router.get('/dashboard/metrics', teacherMiddleware, dashboardController.getMetrics);
+
 // API Token management
 router.post('/user/generate-token', superAdminMiddleware, userController.generateToken);
 
@@ -66,6 +70,7 @@ router.post('/questions', teacherMiddleware, quizController.addQuestion);
 router.get('/questions/lesson/:lessonId', quizController.getQuestionsForLesson); // Accessible by student
 router.get('/questions/module/:moduleId', quizController.getQuestionsForModule); // Accessible by student
 router.post('/quiz/submit', quizController.submitQuiz); // Accessible by student
+router.get('/grades', teacherMiddleware, quizController.getAllGrades); // Teacher/Coordinator/Admin
 
 // Finance
 router.get('/finance', superAdminMiddleware, financeController.getAllCharges);

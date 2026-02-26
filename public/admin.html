@@ -42,20 +42,43 @@
     <div class="flex-1 max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Sidebar -->
         <div class="bg-white shadow rounded-lg p-4 h-fit space-y-2">
-            <button id="btn-courses" class="w-full text-left px-4 py-2 bg-gray-100 rounded text-primary font-bold"
+            <button id="btn-dashboard" class="w-full text-left px-4 py-2 bg-gray-100 rounded text-primary font-bold"
+                onclick="showTab('dashboard')">Dashboard</button>
+            <button id="btn-courses" class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded"
                 onclick="showTab('courses')">Cursos & Módulos</button>
+            <button id="btn-grades" class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded"
+                onclick="showTab('grades')">Notas e Aval. Módulos</button>
             <button id="btn-finance" class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded"
                 onclick="showTab('finance')">Financeiro</button>
             <button id="btn-settings" class="w-full text-left px-4 py-2 hover:bg-gray-50 rounded"
-                onclick="showTab('settings')">Config.
-                White-Label</button>
+                onclick="showTab('settings')">Config. White-Label</button>
         </div>
 
         <!-- Main Content -->
         <div class="col-span-3 bg-white shadow rounded-lg p-6">
 
+            <!-- Dashboard Tab (Default) -->
+            <div id="tab-dashboard">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Visão Geral</h2>
+
+                <!-- Metric Cards -->
+                <div id="dashboard-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Cards will be injected via JS -->
+                </div>
+
+                <!-- Charts Area -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 border rounded p-4 h-80">
+                        <canvas id="chart-primary"></canvas>
+                    </div>
+                    <div id="chart-secondary-container" class="bg-gray-50 border rounded p-4 h-80 hidden">
+                        <canvas id="chart-secondary"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <!-- Courses Tab -->
-            <div id="tab-courses">
+            <div id="tab-courses" class="hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold">Módulos do Curso</h2>
                     <button onclick="document.getElementById('module-modal').classList.remove('hidden')"
@@ -63,6 +86,40 @@
                 </div>
                 <div id="modules-list" class="space-y-4">
                     <!-- Modules injected here -->
+                </div>
+            </div>
+
+            <!-- Grades Tab -->
+            <div id="tab-grades" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Histórico de Notas (Avaliações de Módulo)</h2>
+                </div>
+                <!-- Make it horizontally scrollable on smaller screens if needed -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aluno</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Módulo</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nota (%)</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grades-list" class="bg-white divide-y divide-gray-200">
+                            <!-- Grades injected here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

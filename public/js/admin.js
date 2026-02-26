@@ -24,7 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAdminSettings();
     }
 
+    loadDashboard();
     loadModules();
+    loadGrades();
 
     // Module Form
     document.getElementById('module-form').addEventListener('submit', async (e) => {
@@ -190,11 +192,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showTab(tab) {
+    document.getElementById('tab-dashboard').classList.add('hidden');
     document.getElementById('tab-courses').classList.add('hidden');
+    document.getElementById('tab-grades').classList.add('hidden');
     document.getElementById('tab-finance').classList.add('hidden');
     document.getElementById('tab-settings').classList.add('hidden');
 
     document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+    // Reset button styles
+    ['btn-dashboard', 'btn-courses', 'btn-grades', 'btn-finance', 'btn-settings'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.classList.remove('bg-gray-100', 'text-gray-800');
+            btn.classList.add('text-gray-600');
+        }
+    });
+
+    // Active button style
+    const activeBtn = document.getElementById(`btn-${tab}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600');
+        activeBtn.classList.add('bg-gray-100', 'text-gray-800');
+    }
 }
 
 async function loadModules() {
@@ -244,6 +264,33 @@ async function loadFinance() {
     } catch (err) { console.error(err); }
 }
 
+async function loadGrades() {
+    try {
+        const res = await fetchWithAuth('/grades');
+        if (res.ok) {
+            const grades = await res.json();
+            const list = document.getElementById('grades-list');
+            if (grades.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhuma avaliação encontrada.</td></tr>`;
+                return;
+            }
+            list.innerHTML = grades.map(g => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${g.student_name}<br><small class="text-gray-500">${g.student_email}</small></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">${g.module_title}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(g.grade).toFixed(1)}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${g.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${g.passed ? 'Aprovado' : 'Reprovado'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(g.created_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) { console.error(err); }
+}
+
 async function loadAdminSettings() {
     try {
         const res = await fetch('/api/settings/public');
@@ -266,4 +313,118 @@ function openQuestionModal(lessonId, moduleId) {
     document.getElementById('q-les-id').value = lessonId || '';
     document.getElementById('q-mod-id').value = moduleId || '';
     document.getElementById('question-modal').classList.remove('hidden');
+}
+
+let chartInstance1 = null;
+let chartInstance2 = null;
+
+async function loadDashboard() {
+    try {
+        const res = await fetchWithAuth('/dashboard/metrics');
+        if (res.ok) {
+            const data = await res.json();
+            const role = localStorage.getItem('role');
+            renderMetricCards(data, role);
+            renderCharts(data, role);
+        }
+    } catch (err) { console.error('Error loading dashboard', err); }
+}
+
+function renderMetricCards(data, role) {
+    const container = document.getElementById('dashboard-cards');
+    let cardsHtml = '';
+
+    const createCard = (title, value, icon, color) => `
+        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-${color}-500 flex items-center">
+            <div class="p-3 rounded-full bg-${color}-100 text-${color}-500 mr-4 text-2xl">${icon}</div>
+            <div>
+                <p class="text-sm text-gray-500 uppercase font-bold">${title}</p>
+                <p class="text-2xl font-bold text-gray-800">${value}</p>
+            </div>
+        </div>
+    `;
+
+    cardsHtml += createCard('Total de Alunos', data.totalStudents, '👥', 'blue');
+    cardsHtml += createCard('Aulas Concluídas', data.totalCompletions, '✅', 'green');
+
+    if (role === 'coordenador' || role === 'super_admin') {
+        cardsHtml += createCard('Média Geral', data.averageGrade, '📈', 'yellow');
+    }
+
+    if (role === 'super_admin') {
+        cardsHtml += createCard('Receita (Pago)', `R$ ${data.totalRevenue}`, '💰', 'green');
+        cardsHtml += createCard('Receita (Pendente)', `R$ ${data.pendingRevenue}`, '⏳', 'red');
+        cardsHtml += createCard('Total Staff', data.totalStaff, '👔', 'purple');
+    }
+
+    container.innerHTML = cardsHtml;
+}
+
+function renderCharts(data, role) {
+    if (chartInstance1) chartInstance1.destroy();
+    if (chartInstance2) chartInstance2.destroy();
+
+    const ctx1 = document.getElementById('chart-primary').getContext('2d');
+
+    if (role === 'professor') {
+        // Professor only sees basic bar chart of completions vs students
+        chartInstance1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Alunos Registrados', 'Aulas Concluídas Total'],
+                datasets: [{
+                    label: 'Engajamento',
+                    data: [data.totalStudents, data.totalCompletions],
+                    backgroundColor: ['#4F46E5', '#10B981']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+        document.getElementById('chart-secondary-container').classList.add('hidden');
+    }
+    else if (role === 'coordenador' || role === 'super_admin') {
+        // Coordinator & Admin sees Module Completion Rates
+        const labels = (data.moduleCompletionRates || []).map(m => m.title);
+        const rates = (data.moduleCompletionRates || []).map(m => m.rate);
+
+        chartInstance1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Taxa de Aprovação por Módulo (%)',
+                    data: rates,
+                    backgroundColor: '#4F46E5'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        if (role === 'coordenador') {
+            document.getElementById('chart-secondary-container').classList.add('hidden');
+        }
+
+        if (role === 'super_admin') {
+            document.getElementById('chart-secondary-container').classList.remove('hidden');
+            const ctx2 = document.getElementById('chart-secondary').getContext('2d');
+            const revLabels = (data.monthlyRevenue || []).map(r => r.month);
+            const revData = (data.monthlyRevenue || []).map(r => r.total);
+
+            chartInstance2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: revLabels,
+                    datasets: [{
+                        label: 'Receita Mensal (R$)',
+                        data: revData,
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    }
 }

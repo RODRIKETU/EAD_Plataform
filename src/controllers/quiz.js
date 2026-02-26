@@ -119,3 +119,37 @@ exports.submitQuiz = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+/**
+ * @swagger
+ * /api/grades:
+ *   get:
+ *     summary: Retrieve all student grades for module evaluations
+ *     security:
+ *       - bearerAuth: []
+ *       - ApiKeyAuth: []
+ */
+exports.getAllGrades = async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                sg.id,
+                u.name as student_name,
+                u.email as student_email,
+                m.title as module_title,
+                sg.grade,
+                sg.passed,
+                sg.created_at
+            FROM student_grades sg
+            JOIN users u ON sg.student_id = u.id
+            JOIN modules m ON sg.module_id = m.id
+            ORDER BY sg.created_at DESC
+        `;
+
+        const [rows] = await db.query(query);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch student grades' });
+    }
+};
