@@ -24,6 +24,8 @@ async function initDb() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         platform_name VARCHAR(255) NOT NULL,
         logo_path VARCHAR(255),
+        login_background_path VARCHAR(255),
+        lgpd_terms TEXT,
         primary_color VARCHAR(50) DEFAULT '#4F46E5',
         secondary_color VARCHAR(50) DEFAULT '#4338CA'
       );

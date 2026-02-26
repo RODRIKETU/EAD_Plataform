@@ -116,12 +116,12 @@ async function showFinance() {
                 list.innerHTML = '<p class="text-gray-500">Nenhuma fatura encontrada.</p>';
             } else {
                 list.innerHTML = charges.map(c => `
-                    <div class="border p-4 rounded bg-gray-50 flex justify-between items-center">
+                    <div class="border dark:border-gray-700 p-4 rounded bg-gray-50 dark:bg-gray-700 flex justify-between items-center transition-colors duration-200">
                         <div>
-                            <p class="font-bold">${c.description}</p>
-                            <p class="text-sm text-gray-500">Vencimento: ${new Date(c.due_date).toLocaleDateString()} - R$ ${c.amount}</p>
+                            <p class="font-bold dark:text-gray-100">${c.description}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-300">Vencimento: ${new Date(c.due_date).toLocaleDateString()} - R$ ${c.amount}</p>
                         </div>
-                        <span class="px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                        <span class="px-2 py-1 text-xs rounded ${c.status === 'paid' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'}">
                             ${c.status.toUpperCase()}
                         </span>
                     </div>
@@ -155,13 +155,13 @@ function openQuizModal(type, id, questions) {
 
     const container = document.getElementById('quiz-container');
     container.innerHTML = questions.map((q, index) => `
-        <div class="border-b mb-4 pb-2" data-qid="${q.id}">
+        <div class="border-b dark:border-gray-700 mb-4 pb-2" data-qid="${q.id}">
             <p class="font-bold mb-2">${index + 1}. ${q.question_text}</p>
             <div class="space-y-1 pl-4">
-                <label class="block cursor-pointer hover:bg-gray-50 p-1 rounded"><input type="radio" name="q-${q.id}" value="A" class="mr-2"> A) ${q.option_a}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 p-1 rounded"><input type="radio" name="q-${q.id}" value="B" class="mr-2"> B) ${q.option_b}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 p-1 rounded"><input type="radio" name="q-${q.id}" value="C" class="mr-2"> C) ${q.option_c}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 p-1 rounded"><input type="radio" name="q-${q.id}" value="D" class="mr-2"> D) ${q.option_d}</label>
+                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="A" class="mr-2"> A) ${q.option_a}</label>
+                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="B" class="mr-2"> B) ${q.option_b}</label>
+                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="C" class="mr-2"> C) ${q.option_c}</label>
+                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="D" class="mr-2"> D) ${q.option_d}</label>
             </div>
         </div>
     `).join('');

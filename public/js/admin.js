@@ -136,9 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fd.append('platform_name', document.getElementById('set-platform-name').value);
         fd.append('primary_color', document.getElementById('set-primary-color').value);
         fd.append('secondary_color', document.getElementById('set-secondary-color').value);
+        fd.append('lgpd_terms', document.getElementById('set-lgpd-terms').value);
 
         const logo = document.getElementById('set-logo').files[0];
         if (logo) fd.append('logo', logo);
+
+        const loginBg = document.getElementById('set-login-bg').files[0];
+        if (loginBg) fd.append('login_bg', loginBg);
 
         try {
             const res = await fetchWithAuth('/settings', {
@@ -224,19 +228,19 @@ async function loadModules() {
             const modules = await res.json();
             const list = document.getElementById('modules-list');
             list.innerHTML = modules.map(m => `
-                <div class="border rounded p-4 mb-4">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <h3 class="font-bold text-lg">${m.title}</h3>
+                <div class="border dark:border-gray-700 rounded p-4 mb-4 transition-colors duration-200">
+                    <div class="flex items-center justify-between border-b dark:border-gray-700 pb-2 mb-2">
+                        <h3 class="font-bold text-lg dark:text-gray-100">${m.title}</h3>
                         <div class="space-x-2">
-                            <button onclick="openQuestionModal(null, ${m.id})" class="text-sm bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">+ Avaliação do Módulo</button>
-                            <button onclick="openLessonModal(${m.id})" class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">+ Nova Aula</button>
+                            <button onclick="openQuestionModal(null, ${m.id})" class="text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded hover:bg-green-200 dark:hover:bg-green-800 transition">+ Avaliação do Módulo</button>
+                            <button onclick="openLessonModal(${m.id})" class="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition">+ Nova Aula</button>
                         </div>
                     </div>
-                    <ul class="text-sm text-gray-700 pl-4 border-l-2 border-gray-200 space-y-2">
+                    <ul class="text-sm text-gray-700 dark:text-gray-300 pl-4 border-l-2 border-gray-200 dark:border-gray-600 space-y-2">
                         ${m.lessons.map(l => `
-                            <li class="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                <span>- ${l.title}</span>
-                                <button onclick="openQuestionModal(${l.id}, ${m.id})" class="text-xs text-blue-600 hover:underline">+ Add Pergunta</button>
+                            <li class="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded transition-colors duration-200">
+                                <span class="dark:text-gray-200">- ${l.title}</span>
+                                <button onclick="openQuestionModal(${l.id}, ${m.id})" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">+ Add Pergunta</button>
                             </li>
                         `).join('')}
                     </ul>
@@ -253,11 +257,11 @@ async function loadFinance() {
             const charges = await res.json();
             const list = document.getElementById('finance-list');
             list.innerHTML = charges.map(c => `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${c.student_email}<br><small>ID: ${c.student_id}</small></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.description}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${c.amount}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.status}</td>
+                <tr class="transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${c.student_email}<br><small class="text-gray-500 dark:text-gray-400">ID: ${c.student_id}</small></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${c.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">R$ ${c.amount}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${c.status}</td>
                 </tr>
             `).join('');
         }
@@ -275,16 +279,16 @@ async function loadGrades() {
                 return;
             }
             list.innerHTML = grades.map(g => `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${g.student_name}<br><small class="text-gray-500">${g.student_email}</small></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">${g.module_title}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(g.grade).toFixed(1)}%</td>
+                <tr class="transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${g.student_name}<br><small class="text-gray-500 dark:text-gray-400">${g.student_email}</small></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-200">${g.module_title}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${parseFloat(g.grade).toFixed(1)}%</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${g.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${g.passed ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'}">
                             ${g.passed ? 'Aprovado' : 'Reprovado'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(g.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(g.created_at).toLocaleDateString()}</td>
                 </tr>
             `).join('');
         }
@@ -299,6 +303,7 @@ async function loadAdminSettings() {
             if (settings.platform_name) document.getElementById('set-platform-name').value = settings.platform_name;
             if (settings.primary_color) document.getElementById('set-primary-color').value = settings.primary_color;
             if (settings.secondary_color) document.getElementById('set-secondary-color').value = settings.secondary_color;
+            if (settings.lgpd_terms) document.getElementById('set-lgpd-terms').value = settings.lgpd_terms;
         }
     } catch (err) { console.error(err); }
 }
@@ -335,11 +340,11 @@ function renderMetricCards(data, role) {
     let cardsHtml = '';
 
     const createCard = (title, value, icon, color) => `
-        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-${color}-500 flex items-center">
-            <div class="p-3 rounded-full bg-${color}-100 text-${color}-500 mr-4 text-2xl">${icon}</div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border-l-4 border-${color}-500 flex items-center transition-colors duration-200">
+            <div class="p-3 rounded-full bg-${color}-100 dark:bg-gray-700 text-${color}-500 mr-4 text-xl sm:text-2xl">${icon}</div>
             <div>
-                <p class="text-sm text-gray-500 uppercase font-bold">${title}</p>
-                <p class="text-2xl font-bold text-gray-800">${value}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 uppercase font-bold">${title}</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${value}</p>
             </div>
         </div>
     `;

@@ -20,6 +20,7 @@ const storage = multer.diskStorage({
         if (file.fieldname === 'video') folder += 'raw_videos/';
         else if (file.fieldname === 'pdf') folder += 'materials/';
         else if (file.fieldname === 'logo') folder += 'logos/';
+        else if (file.fieldname === 'login_bg') folder += 'backgrounds/';
         else folder += 'misc/';
 
         if (!fs.existsSync(folder)) {
@@ -46,7 +47,7 @@ router.get('/profile', userController.getProfile);
 router.put('/profile', userController.updateProfile);
 
 // Admin Only Settings
-router.put('/settings', superAdminMiddleware, upload.single('logo'), settingsController.updateSettings);
+router.put('/settings', superAdminMiddleware, upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'login_bg', maxCount: 1 }]), settingsController.updateSettings);
 
 // Dashboards (Accessible to professor, coordinator, and super_admin via teacherMiddleware baseline)
 router.get('/dashboard/metrics', teacherMiddleware, dashboardController.getMetrics);

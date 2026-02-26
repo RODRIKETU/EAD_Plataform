@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Aluno</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -27,17 +32,26 @@
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col">
-    <nav class="bg-white shadow">
+<body
+    class="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <nav class="bg-white dark:bg-gray-800 shadow transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <img class="h-8 w-auto dynamic-logo" src="https://via.placeholder.com/150x50" alt="Logo">
-                    <span class="ml-4 font-bold text-xl dynamic-title">EAD</span>
+                    <a href="/student.html" class="flex items-center hover:opacity-80 transition">
+                        <img class="h-8 w-auto dynamic-logo object-contain" src="https://via.placeholder.com/150x50"
+                            alt="Logo">
+                        <span class="ml-4 font-bold text-xl dynamic-title dark:text-white">EAD</span>
+                    </a>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/profile.html" class="text-gray-500 hover:text-gray-700">Meu Perfil</a>
-                    <button id="logout-btn" class="text-red-500 hover:text-red-700">Sair</button>
+                    <button onclick="window.toggleDarkMode && window.toggleDarkMode()"
+                        class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white text-xl"
+                        title="Alternar Modo Escuro">🌓</button>
+                    <a href="/profile.html"
+                        class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white">Meu
+                        Perfil</a>
+                    <button id="logout-btn" class="text-red-500 hover:text-red-400">Sair</button>
                 </div>
             </div>
         </div>
@@ -45,32 +59,35 @@
 
     <div class="flex-1 max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Sidebar Navigation -->
-        <div class="bg-white shadow rounded-lg p-4 h-fit space-y-4">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 h-fit space-y-4 transition-colors duration-200">
             <div>
-                <h3 class="font-bold text-lg mb-2 border-b pb-2">Meu Curso</h3>
+                <h3 class="font-bold text-lg mb-2 border-b dark:border-gray-700 pb-2">Meu Curso</h3>
                 <div id="course-navigation" class="space-y-2">
                     <!-- Modules and Lessons will be injected here -->
                 </div>
             </div>
             <div>
-                <h3 class="font-bold text-lg mb-2 border-b pb-2">Ações</h3>
+                <h3 class="font-bold text-lg mb-2 border-b dark:border-gray-700 pb-2">Ações</h3>
                 <button onclick="showFinance()"
-                    class="w-full text-left px-2 py-1 hover:bg-gray-50 rounded">Financeiro</button>
+                    class="w-full text-left px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors duration-150">Financeiro</button>
             </div>
         </div>
 
         <!-- Main Content (Video Player) -->
-        <div id="main-content" class="col-span-3 bg-white shadow rounded-lg p-6">
+        <div id="main-content"
+            class="col-span-3 bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
             <h2 id="lesson-title" class="text-2xl font-bold mb-4">Selecione uma aula</h2>
 
             <div id="video-container" class="aspect-w-16 aspect-h-9 bg-black mb-4 hidden rounded overflow-hidden">
                 <video id="video-player" controls class="w-full h-full" controlsList="nodownload"></video>
             </div>
 
-            <div id="lesson-actions" class="flex justify-between items-center hidden mt-6 pt-4 border-t">
+            <div id="lesson-actions"
+                class="flex justify-between items-center hidden mt-6 pt-4 border-t dark:border-gray-700">
                 <a id="btn-support-material" href="#" target="_blank" class="hidden text-primary underline">Baixar
                     Material de Apoio (PDF)</a>
-                <button id="btn-mark-completed" class="bg-primary text-white px-4 py-2 rounded">Marcar como
+                <button id="btn-mark-completed"
+                    class="bg-primary text-white px-4 py-2 rounded shadow hover:opacity-90 transition">Marcar como
                     Concluída</button>
             </div>
 
@@ -86,15 +103,18 @@
 
     <!-- Quiz Modal -->
     <div id="quiz-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-[32rem] shadow-lg rounded-md bg-white">
-            <h3 id="quiz-modal-title" class="text-xl font-bold mb-4">Quiz</h3>
-            <div id="quiz-container" class="space-y-6">
+        <div
+            class="relative top-20 mx-auto p-5 border dark:border-gray-700 w-[32rem] shadow-lg rounded-md bg-white dark:bg-gray-800 transition-colors duration-200">
+            <h3 id="quiz-modal-title" class="text-xl font-bold mb-4 dark:text-gray-100">Quiz</h3>
+            <div id="quiz-container" class="space-y-6 dark:text-gray-100">
                 <!-- Questions injected here -->
             </div>
             <div class="flex justify-end mt-6">
                 <button type="button" onclick="closeQuizModal()"
-                    class="px-4 py-2 text-gray-700 bg-gray-200 rounded mr-2">Cancelar</button>
-                <button id="btn-submit-quiz" class="px-4 py-2 bg-primary text-white rounded">Enviar Respostas</button>
+                    class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded mr-2 hover:opacity-80 transition">Cancelar</button>
+                <button id="btn-submit-quiz"
+                    class="px-4 py-2 bg-primary text-white rounded hover:opacity-80 transition">Enviar
+                    Respostas</button>
             </div>
         </div>
     </div>
