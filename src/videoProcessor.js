@@ -1,6 +1,9 @@
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const path = require('path');
 const fs = require('fs');
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const processVideo = (inputPath, outputFolder) => {
     return new Promise((resolve, reject) => {
