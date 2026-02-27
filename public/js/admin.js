@@ -35,11 +35,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = document.getElementById('mod-title').value;
         const description = document.getElementById('mod-desc').value;
 
+        const isFree = document.getElementById('mod-is-free').checked;
+        const price = document.getElementById('mod-price').value;
+        const quizLimit = document.getElementById('mod-quiz-limit').value || 10;
+        const thumbnail = document.getElementById('mod-thumbnail').files[0];
+
+        const fd = new FormData();
+        fd.append('title', title);
+        fd.append('description', description);
+        fd.append('is_free', isFree);
+        fd.append('quiz_question_limit', quizLimit);
+        if (!isFree) fd.append('price', price);
+        if (thumbnail) fd.append('thumbnail', thumbnail);
+
         try {
             const res = await fetchWithAuth('/modules', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, description })
+                body: fd
             });
 
             if (res.ok) {
@@ -52,11 +64,72 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error(err); }
     });
 
+    // Toggle price on Create Module
+    document.getElementById('mod-is-free').addEventListener('change', (e) => {
+        const container = document.getElementById('mod-price-container');
+        if (e.target.checked) {
+            container.classList.add('hidden');
+            document.getElementById('mod-price').removeAttribute('required');
+        } else {
+            container.classList.remove('hidden');
+            document.getElementById('mod-price').setAttribute('required', 'true');
+        }
+    });
+
+    // Toggle price on Edit Module
+    document.getElementById('edit-mod-is-free').addEventListener('change', (e) => {
+        const container = document.getElementById('edit-mod-price-container');
+        if (e.target.checked) {
+            container.classList.add('hidden');
+            document.getElementById('edit-mod-price').removeAttribute('required');
+        } else {
+            container.classList.remove('hidden');
+            document.getElementById('edit-mod-price').setAttribute('required', 'true');
+        }
+    });
+
+    // Edit Module Form
+    document.getElementById('edit-module-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-mod-id').value;
+        const title = document.getElementById('edit-mod-title').value;
+        const description = document.getElementById('edit-mod-desc').value;
+        const isFree = document.getElementById('edit-mod-is-free').checked;
+        const price = document.getElementById('edit-mod-price').value;
+        const quizLimit = document.getElementById('edit-mod-quiz-limit').value || 10;
+        const thumbnail = document.getElementById('edit-mod-thumbnail').files[0];
+
+        const fd = new FormData();
+        fd.append('title', title);
+        fd.append('description', description);
+        fd.append('is_free', isFree);
+        fd.append('quiz_question_limit', quizLimit);
+        if (!isFree) fd.append('price', price);
+        if (thumbnail) fd.append('thumbnail', thumbnail);
+
+        try {
+            const res = await fetchWithAuth(`/modules/${id}`, {
+                method: 'PUT',
+                body: fd
+            });
+
+            if (res.ok) {
+                document.getElementById('edit-module-modal').classList.add('hidden');
+                document.getElementById('edit-module-form').reset();
+                loadModules();
+            } else {
+                alert('Erro ao atualizar módulo');
+            }
+        } catch (err) { console.error(err); }
+    });
+
+
     // Lesson Form (with Video Upload)
     document.getElementById('lesson-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const moduleId = document.getElementById('les-mod-id').value;
         const title = document.getElementById('les-title').value;
+        const descTitle = document.getElementById('les-desc-title').value;
         const desc = document.getElementById('les-desc').value;
         const videoInput = document.getElementById('les-video').files[0];
         const pdfInput = document.getElementById('les-pdf').files[0];
@@ -70,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lessonFormData = new FormData();
             lessonFormData.append('module_id', moduleId);
             lessonFormData.append('title', title);
+            lessonFormData.append('description_title', descTitle);
             lessonFormData.append('description', desc);
             if (pdfInput) lessonFormData.append('pdf', pdfInput);
 
@@ -102,6 +176,49 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             alert('Erro ao salvar aula');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Salvar';
+        }
+    });
+
+    // Edit Lesson Form
+    document.getElementById('edit-lesson-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const lessonId = document.getElementById('edit-les-id').value;
+        const title = document.getElementById('edit-les-title').value;
+        const descTitle = document.getElementById('edit-les-desc-title').value;
+        const desc = document.getElementById('edit-les-desc').value;
+        const minPassScore = document.getElementById('edit-les-min-score').value;
+        const submitBtn = document.getElementById('edit-les-submit-btn');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Transferindo...';
+
+        try {
+            const body = {
+                title,
+                description_title: descTitle,
+                description: desc,
+                min_pass_score: minPassScore
+            };
+
+            const res = await fetchWithAuth(`/lessons/${lessonId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                alert('Aula atualizada com sucesso!');
+                document.getElementById('edit-lesson-modal').classList.add('hidden');
+                document.getElementById('edit-lesson-form').reset();
+                loadModules();
+            } else {
+                alert('Erro ao atualizar aula');
+            }
+        } catch (err) {
+            console.error(err);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Salvar';
@@ -272,34 +389,233 @@ function showTab(tab) {
     }
 }
 
+// removed duplicate loadModules
+
+function editModule(encodedModule) {
+    const m = JSON.parse(decodeURIComponent(encodedModule));
+    document.getElementById('edit-mod-id').value = m.id;
+    document.getElementById('edit-mod-title').value = m.title;
+    document.getElementById('edit-mod-desc').value = m.description || '';
+
+    const isFreeCheckbox = document.getElementById('edit-mod-is-free');
+    const priceContainer = document.getElementById('edit-mod-price-container');
+    const priceInput = document.getElementById('edit-mod-price');
+
+    isFreeCheckbox.checked = m.is_free;
+
+    if (m.is_free) {
+        priceContainer.classList.add('hidden');
+        priceInput.removeAttribute('required');
+        priceInput.value = '';
+    } else {
+        priceContainer.classList.remove('hidden');
+        priceInput.setAttribute('required', 'true');
+        priceInput.value = parseFloat(m.price).toFixed(2);
+    }
+
+    document.getElementById('edit-mod-thumbnail').value = ''; // Reset file input
+    document.getElementById('edit-mod-quiz-limit').value = m.quiz_question_limit || 10;
+    document.getElementById('edit-module-modal').classList.remove('hidden');
+}
+
+async function deleteModule(id) {
+    if (!confirm('Tem certeza que deseja excluir ESTE CURSO e TODAS as suas aulas? Esta ação é irreversível.')) return;
+    try {
+        const res = await fetchWithAuth(`/modules/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert('Curso excluído com sucesso.');
+            loadModules();
+        } else {
+            alert('Erro ao excluir curso.');
+        }
+    } catch (err) { console.error(err); }
+}
+
+// Global scope referencing last loaded modules to easily rebuild orders and detail views
+let lastModulesData = [];
+let currentDetailModuleId = null;
+
 async function loadModules() {
     try {
         const res = await fetchWithAuth('/modules');
         if (res.ok) {
-            const modules = await res.json();
+            lastModulesData = await res.json();
+            const modules = lastModulesData;
             const list = document.getElementById('modules-list');
-            list.innerHTML = modules.map(m => `
-                <div class="border border-gray-100 dark:border-gray-700 rounded-xl p-5 mb-5 shadow-sm bg-white dark:bg-gray-800 transition-colors duration-200">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 mb-4 gap-3">
-                        <h3 class="font-bold text-xl text-gray-800 dark:text-gray-100">${m.title}</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="openQuestionListModal(null, ${m.id})" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors font-semibold">Avaliações do Módulo</button>
-                            <button onclick="openLessonModal(${m.id})" class="text-xs bg-primary text-white px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity font-semibold shadow-sm">+ Nova Aula</button>
+
+            if (modules.length === 0) {
+                list.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500 dark:text-gray-400">Nenhum curso cadastrado ainda.</div>';
+            } else {
+                list.innerHTML = modules.map(m => `
+                    <div class="course-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer flex flex-col" data-title="${m.title.toLowerCase()}" onclick="openCourseDetails(${m.id})">
+                        ${m.thumbnail_url ? `<img src="${m.thumbnail_url}" alt="${m.title}" class="w-full h-40 object-cover border-b border-gray-100 dark:border-gray-700">` : `<div class="w-full h-40 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700"><span class="text-sm font-medium">Sem imagem</span></div>`}
+                        <div class="p-5 flex-1 flex flex-col">
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100 line-clamp-2 mb-2 leading-tight">${m.title}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">${m.description || 'Sem descrição.'}</p>
+                            <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full ${m.is_free ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}">
+                                    ${m.is_free ? 'Gratuito' : `R$ ${m.price}`}
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-full">${m.lessons ? m.lessons.length : 0} aulas</span>
+                            </div>
                         </div>
                     </div>
-                    <ul class="space-y-3">
-                        ${m.lessons.map(l => `
-                            <li class="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50/50 hover:bg-gray-50 dark:bg-gray-700/50 dark:hover:bg-gray-700 border border-gray-50 dark:border-gray-600 p-3 rounded-lg transition-colors duration-200">
-                                <span class="font-medium text-gray-700 dark:text-gray-200 mb-2 sm:mb-0">${l.title}</span>
-                                <div class="flex gap-2">
-                                    <button onclick="openQuestionListModal(${l.id}, ${m.id})" class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-md shadow-sm hover:text-primary transition-colors">Perguntas</button>
-                                    <button onclick="openMaterialsListModal(${l.id})" class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-md shadow-sm hover:text-indigo-600 transition-colors">Materiais</button>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
+                `).join('');
+            }
+
+            // Re-apply filter if searching
+            filterCourses();
+
+            // Refresh detail view if it's currently open
+            if (currentDetailModuleId) {
+                openCourseDetails(currentDetailModuleId);
+            }
+        }
+    } catch (err) { console.error(err); }
+}
+
+function filterCourses() {
+    const input = document.getElementById('course-search-input');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const cards = document.querySelectorAll('.course-card');
+    cards.forEach(card => {
+        const title = card.getAttribute('data-title');
+        if (title.indexOf(filter) > -1) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function openCourseDetails(moduleId) {
+    const module = lastModulesData.find(m => m.id === moduleId);
+    if (!module) return;
+
+    currentDetailModuleId = moduleId;
+
+    // Switch views
+    document.getElementById('courses-master-view').classList.add('hidden');
+    document.getElementById('courses-detail-view').classList.remove('hidden');
+
+    // Update header
+    document.getElementById('detail-course-title').textContent = module.title;
+
+    const badgesHtml = `
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full ${module.is_free ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}">${module.is_free ? 'Gratuito' : `R$ ${module.price}`}</span>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">${module.lessons ? module.lessons.length : 0} aulas</span>
+    `;
+    document.getElementById('detail-course-badges').innerHTML = badgesHtml;
+
+    // Update action buttons safely, ensuring they trigger the correct global functions
+    document.getElementById('btn-edit-course').onclick = () => editModule(encodeURIComponent(JSON.stringify(module)));
+    document.getElementById('btn-delete-course').onclick = () => deleteModule(module.id);
+    document.getElementById('btn-add-lesson').onclick = () => openLessonModal(module.id);
+    document.getElementById('btn-course-questions').onclick = () => openQuestionListModal(null, module.id);
+
+    // Render lessons
+    const list = document.getElementById('detail-lessons-list');
+    if (!module.lessons || module.lessons.length === 0) {
+        list.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700 text-center">Nenhuma aula cadastrada neste curso.</div>';
+    } else {
+        list.innerHTML = module.lessons.map((l, index) => `
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700/80 border border-gray-100 dark:border-gray-700 p-4 rounded-xl transition-colors duration-200 shadow-sm">
+                <span class="font-bold text-gray-700 dark:text-gray-200 mb-3 sm:mb-0 flex items-center gap-2">
+                    <span class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-black text-gray-500 dark:text-gray-400">${index + 1}</span>
+                    ${l.title}
+                </span>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="moveLessonUp(${module.id}, ${index})" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold" title="Mover para Cima">↑</button>
+                    <button onclick="moveLessonDown(${module.id}, ${index})" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-bold" title="Mover para Baixo">↓</button>
+                    <button onclick="editLesson('${encodeURIComponent(JSON.stringify(l))}')" class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg shadow-sm hover:text-primary dark:hover:text-primary transition-colors font-semibold">Editar</button>
+                    <button onclick="deleteLesson(${l.id})" class="text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800/50 px-3 py-1.5 rounded-lg shadow-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors font-semibold">Excluir</button>
+                    <button onclick="openQuestionListModal(${l.id}, ${module.id})" class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg shadow-sm hover:text-primary dark:hover:text-primary transition-colors font-semibold">Perguntas</button>
+                    <button onclick="openMaterialsListModal(${l.id})" class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-semibold">Materiais</button>
                 </div>
-            `).join('');
+            </div>
+        `).join('');
+    }
+}
+
+function closeCourseDetails() {
+    currentDetailModuleId = null;
+    document.getElementById('courses-detail-view').classList.add('hidden');
+    document.getElementById('courses-master-view').classList.remove('hidden');
+    // Clear search context if we want to
+}
+
+function editLesson(encodedLesson) {
+    const l = JSON.parse(decodeURIComponent(encodedLesson));
+    document.getElementById('edit-les-id').value = l.id;
+    document.getElementById('edit-les-title').value = l.title;
+    document.getElementById('edit-les-desc-title').value = l.description_title || '';
+    document.getElementById('edit-les-desc').value = l.description || '';
+    document.getElementById('edit-les-min-score').value = l.min_pass_score || 70;
+    document.getElementById('edit-lesson-modal').classList.remove('hidden');
+}
+
+async function deleteLesson(id) {
+    if (!confirm('Tem certeza que deseja excluir esta aula? Esta ação é irreversível.')) return;
+    try {
+        const res = await fetchWithAuth(`/lessons/ ${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            alert('Aula excluída com sucesso.');
+            loadModules();
+        } else {
+            alert('Erro ao excluir aula.');
+        }
+    } catch (err) { console.error(err); }
+}
+
+async function moveLessonUp(moduleId, lessonIndex) {
+    if (lessonIndex === 0) return; // Already at top
+
+    const moduleObj = lastModulesData.find(m => m.id === moduleId);
+    if (!moduleObj) return;
+
+    const lessons = [...moduleObj.lessons];
+    // Swap elements
+    const temp = lessons[lessonIndex - 1];
+    lessons[lessonIndex - 1] = lessons[lessonIndex];
+    lessons[lessonIndex] = temp;
+
+    await saveNewLessonOrder(lessons);
+}
+
+async function moveLessonDown(moduleId, lessonIndex) {
+    const moduleObj = lastModulesData.find(m => m.id === moduleId);
+    if (!moduleObj) return;
+
+    const lessons = [...moduleObj.lessons];
+    if (lessonIndex === lessons.length - 1) return; // Already at bottom
+
+    // Swap elements
+    const temp = lessons[lessonIndex + 1];
+    lessons[lessonIndex + 1] = lessons[lessonIndex];
+    lessons[lessonIndex] = temp;
+
+    await saveNewLessonOrder(lessons);
+}
+
+async function saveNewLessonOrder(lessonsArray) {
+    // Generate updates payload
+    const updates = lessonsArray.map((l, i) => ({
+        id: l.id,
+        display_order: i
+    }));
+
+    try {
+        const res = await fetchWithAuth('/lessons/reorder', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates })
+        });
+
+        if (res.ok) {
+            loadModules(); // Refresh UI
+        } else {
+            alert('Erro ao reordenar aulas.');
         }
     } catch (err) { console.error(err); }
 }
@@ -317,7 +633,7 @@ async function loadFinance() {
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">R$ ${c.amount}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${c.status}</td>
                 </tr>
-            `).join('');
+                `).join('');
         }
     } catch (err) { console.error(err); }
 }
@@ -344,7 +660,7 @@ async function loadGrades() {
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(g.created_at).toLocaleDateString()}</td>
                 </tr>
-            `).join('');
+                `).join('');
         }
     } catch (err) { console.error(err); }
 }
@@ -368,14 +684,14 @@ async function loadStudents() {
                         <button onclick="viewStudentDetails(${s.id})" class="text-primary hover:underline font-medium">Ver Detalhes</button>
                     </td>
                 </tr>
-            `).join('');
+                `).join('');
         }
     } catch (err) { console.error(err); }
 }
 
 async function viewStudentDetails(studentId) {
     try {
-        const res = await fetchWithAuth(`/students/${studentId}/details`);
+        const res = await fetchWithAuth(`/students/ ${studentId}/details`);
         if (res.ok) {
             const data = await res.json();
             document.getElementById('student-modal-name').textContent = data.student.name;
@@ -387,13 +703,13 @@ async function viewStudentDetails(studentId) {
                 progressList.innerHTML = '<li class="text-sm text-gray-500 dark:text-gray-400">Nenhuma aula iniciada.</li>';
             } else {
                 progressList.innerHTML = data.progress.map(p => `
-                    <li class="flex flex-col text-sm p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-gray-700">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="dark:text-gray-200"><span class="font-medium text-gray-800 dark:text-gray-100">${p.module_title}</span> - ${p.lesson_title}</span>
-                            <span class="${p.is_completed ? 'text-green-600 dark:text-green-400 font-bold' : 'text-yellow-600 dark:text-yellow-400'} px-2 py-1 rounded-full text-xs bg-gray-50 dark:bg-gray-700">
-                                ${p.is_completed ? 'Concluída' : 'Em andamento'}
-                            </span>
-                        </div>
+            < li class= "flex flex-col text-sm p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-gray-700" >
+            <div class="flex justify-between items-center mb-1">
+                <span class="dark:text-gray-200"><span class="font-medium text-gray-800 dark:text-gray-100">${p.module_title}</span> - ${p.lesson_title}</span>
+                <span class="${p.is_completed ? 'text-green-600 dark:text-green-400 font-bold' : 'text-yellow-600 dark:text-yellow-400'} px-2 py-1 rounded-full text-xs bg-gray-50 dark:bg-gray-700">
+                    ${p.is_completed ? 'Concluída' : 'Em andamento'}
+                </span>
+            </div>
                         ${p.grade !== null && p.grade !== undefined ? `
                             <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                                 <div>
@@ -402,7 +718,8 @@ async function viewStudentDetails(studentId) {
                                 </div>
                                 <button onclick="viewStudentAnswers(${studentId}, ${p.lesson_id}, '${p.lesson_title}')" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full hover:bg-indigo-100 transition-colors font-medium">Ver Respostas</button>
                             </div>
-                        ` : ''}
+                            ` : ''
+                    }
                     </li>
                 `).join('');
             }
@@ -413,7 +730,7 @@ async function viewStudentDetails(studentId) {
                 gradesList.innerHTML = '<li class="text-sm text-gray-500 dark:text-gray-400">Nenhuma avaliação realizada.</li>';
             } else {
                 gradesList.innerHTML = data.grades.map(g => `
-                    <li class="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-700/50 rounded mb-2">
+                <li class="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-700/50 rounded mb-2">
                         <span class="dark:text-gray-200 font-medium">${g.module_title}</span>
                         <div class="text-right">
                             <span class="block text-gray-900 dark:text-gray-100 font-bold">${parseFloat(g.grade).toFixed(1)}%</span>
@@ -463,9 +780,11 @@ async function openQuestionListModal(lessonId, moduleId) {
     document.getElementById('ql-current-les').value = lessonId || '';
     document.getElementById('ql-current-mod').value = moduleId || '';
 
+    document.getElementById('ql-current-mod').value = moduleId || '';
+
     let url = '';
-    if (lessonId) url = `/questions/lesson/${lessonId}`;
-    else if (moduleId) url = `/questions/module/${moduleId}`;
+    if (lessonId) url = `/questions/lesson/ ${lessonId}`;
+    else if (moduleId) url = `/questions/module/ ${moduleId}`;
 
     if (!url) return;
 
@@ -478,13 +797,13 @@ async function openQuestionListModal(lessonId, moduleId) {
                 container.innerHTML = '<li class="text-gray-500 py-4 text-center border rounded dark:border-gray-700">Nenhuma pergunta cadastrada.</li>';
             } else {
                 container.innerHTML = questions.map((q, idx) => `
-                    <li class="bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors duration-200">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-1">Q${idx + 1}: ${q.question_text}</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">
-                                <span class="${q.correct_option === 'A' ? 'text-green-600 font-bold dark:text-green-400' : ''}">A) ${q.option_a}</span><br>
-                                <span class="${q.correct_option === 'B' ? 'text-green-600 font-bold dark:text-green-400' : ''}">B) ${q.option_b}</span><br>
-                                <span class="${q.correct_option === 'C' ? 'text-green-600 font-bold dark:text-green-400' : ''}">C) ${q.option_c}</span><br>
+            < li class= "bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors duration-200" >
+            <div class="flex-1">
+                <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-1">Q${idx + 1}: ${q.question_text}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    <span class="${q.correct_option === 'A' ? 'text-green-600 font-bold dark:text-green-400' : ''}">A) ${q.option_a}</span><br>
+                        <span class="${q.correct_option === 'B' ? 'text-green-600 font-bold dark:text-green-400' : ''}">B) ${q.option_b}</span><br>
+                            <span class="${q.correct_option === 'C' ? 'text-green-600 font-bold dark:text-green-400' : ''}">C) ${q.option_c}</span><br>
                                 <span class="${q.correct_option === 'D' ? 'text-green-600 font-bold dark:text-green-400' : ''}">D) ${q.option_d}</span>
                             </p>
                         </div>
@@ -493,7 +812,7 @@ async function openQuestionListModal(lessonId, moduleId) {
                             <button onclick="deleteQuestion(${q.id}, ${lessonId}, ${moduleId})" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition">Excluir</button>
                         </div>
                     </li>
-                `).join('');
+                    `).join('');
             }
             document.getElementById('question-list-modal').classList.remove('hidden');
         } else {
@@ -554,14 +873,14 @@ function renderMetricCards(data, role) {
     let cardsHtml = '';
 
     const createCard = (title, value, icon, iconBgClass, iconTextClass) => `
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-            <div class="p-3.5 rounded-full ${iconBgClass} ${iconTextClass} mr-5 text-2xl shadow-sm">${icon}</div>
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider mb-1">${title}</p>
-                <p class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">${value}</p>
-            </div>
-        </div>
-    `;
+                    <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                        <div class="p-3.5 rounded-full ${iconBgClass} ${iconTextClass} mr-5 text-2xl shadow-sm">${icon}</div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider mb-1">${title}</p>
+                            <p class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">${value}</p>
+                        </div>
+                    </div>
+                    `;
 
     cardsHtml += createCard('Total de Alunos', data.totalStudents, '👥', 'bg-blue-50 dark:bg-blue-900/40', 'text-blue-600 dark:text-blue-400');
     cardsHtml += createCard('Aulas Concluídas', data.totalCompletions, '✅', 'bg-emerald-50 dark:bg-emerald-900/40', 'text-emerald-600 dark:text-emerald-400');

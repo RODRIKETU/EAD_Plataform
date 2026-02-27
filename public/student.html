@@ -60,25 +60,60 @@
 
     <div class="flex-1 max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Sidebar Navigation -->
-        <div
-            class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 h-fit space-y-5 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+        <div id="sidebar-container"
+            class="hidden bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 h-fit space-y-5 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-3 border-b dark:border-gray-700 pb-2">
+                <h3 class="font-black text-xl dark:text-gray-100 text-gray-800 tracking-tight">Trilha do Curso</h3>
+                <button onclick="showDashboard()" title="Voltar ao Início"
+                    class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                    🏠
+                </button>
+            </div>
             <div>
-                <h3 class="font-black text-xl mb-3 dark:text-gray-100 text-gray-800 tracking-tight">Meu Curso</h3>
                 <div id="course-navigation" class="space-y-4">
                     <!-- Modules and Lessons will be injected here -->
                 </div>
             </div>
-            <div class="pt-4 border-t dark:border-gray-700">
+            <div class="pt-4 border-t dark:border-gray-700 space-y-2">
                 <h3 class="font-bold text-lg mb-2 text-gray-700 dark:text-gray-200">Ações</h3>
+                <button onclick="showCertificates()"
+                    class="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-semibold text-gray-600 dark:text-gray-300">🎓
+                    Meus Certificados</button>
                 <button onclick="showFinance()"
                     class="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-semibold text-gray-600 dark:text-gray-300">💰
                     Ver Financeiro</button>
             </div>
         </div>
 
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="col-span-4 space-y-8 bg-transparent">
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="dashboard-stats">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- My Courses Row -->
+            <div>
+                <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight mb-4">Meus Cursos</h2>
+                <div id="dashboard-my-courses" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Available Courses Row -->
+            <div>
+                <h2 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight mb-4 mt-8">Cursos
+                    Disponíveis
+                </h2>
+                <div id="dashboard-available-courses" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content (Video Player) -->
         <div id="main-content"
-            class="col-span-3 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-6 md:p-8 transition-colors duration-200">
+            class="hidden col-span-3 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-6 md:p-8 transition-colors duration-200">
             <h2 id="lesson-title" class="text-3xl font-black text-gray-800 dark:text-gray-100 mb-6 tracking-tight">
                 Selecione uma aula</h2>
 
@@ -91,7 +126,8 @@
             <!-- Video Description Section -->
             <div id="lesson-desc-container"
                 class="hidden mb-6 bg-gray-50 dark:bg-gray-700/50 p-6 rounded-xl border border-gray-100 dark:border-gray-700">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">Sobre esta aula</h3>
+                <h3 id="lesson-desc-title" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">Sobre esta
+                    aula</h3>
                 <div id="lesson-desc-content"
                     class="text-gray-600 dark:text-gray-300 whitespace-pre-line leading-relaxed">
                     <!-- Description injected here via JS -->
@@ -110,9 +146,40 @@
 
             <!-- Finance View -->
             <div id="finance-view" class="hidden">
-                <h2 class="text-xl font-bold mb-4">Minhas Faturas</h2>
-                <div id="my-charges" class="space-y-4">
-                    <!-- Charges injected here -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Estatísticas
+                        Financeiras</h2>
+                    <button onclick="showDashboard()"
+                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg transition-colors">Voltar</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-700 dark:text-gray-300">Minhas Faturas</h3>
+                        <div id="my-charges" class="space-y-4">
+                            <!-- Charges injected here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-700 dark:text-gray-300">Comprovantes de Assinatura
+                            (Cursos)</h3>
+                        <div id="my-enrollment-receipts" class="space-y-4">
+                            <!-- Receipts injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificates View -->
+            <div id="certificates-view" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-black text-gray-800 dark:text-gray-100 tracking-tight">Meus Certificados
+                    </h2>
+                    <button onclick="showDashboard()"
+                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg transition-colors">Voltar</button>
+                </div>
+                <div id="certificates-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Certificates injected here -->
                 </div>
             </div>
         </div>

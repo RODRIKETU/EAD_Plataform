@@ -42,10 +42,25 @@ async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS enrollments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        student_id INT,
+        module_id INT,
+        enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status ENUM('active', 'completed') DEFAULT 'active',
+        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+        UNIQUE KEY student_module_enrollment (student_id, module_id)
+      );
+
       CREATE TABLE IF NOT EXISTS modules (
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         description TEXT,
+        price DECIMAL(10,2) DEFAULT 0.00,
+        thumbnail_url VARCHAR(255),
+        is_free BOOLEAN DEFAULT TRUE,
+        quiz_question_limit INT DEFAULT 10,
         display_order INT DEFAULT 0
       );
 
@@ -53,6 +68,7 @@ async function initDb() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         module_id INT,
         title VARCHAR(255) NOT NULL,
+        description_title VARCHAR(255),
         description TEXT,
         video_hls_path VARCHAR(255),
         support_material_path VARCHAR(255),

@@ -60,8 +60,17 @@ exports.getQuestionsForLesson = async (req, res) => {
  */
 exports.getQuestionsForModule = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM questions WHERE module_id = ? AND lesson_id IS NULL', [req.params.moduleId]);
-        res.json(rows);
+        const moduleId = req.params.moduleId;
+        const [moduleRows] = await db.query('SELECT quiz_question_limit FROM modules WHERE id = ?', [moduleId]);
+        const limit = moduleRows.length > 0 ? (moduleRows[0].quiz_question_limit || 10) : 10;
+
+        const [rows] = await db.query('SELECT * FROM questions WHERE module_id = ? AND lesson_id IS NULL', [moduleId]);
+
+        // Shuffle and limit
+        const shuffled = rows.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, limit);
+
+        res.json(selected);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -83,27 +92,37 @@ exports.submitQuiz = async (req, res) => {
 
         let query = 'SELECT id, correct_option FROM questions WHERE ';
         let params = [];
+        let limit = 0;
+
         if (lesson_id) {
             query += 'lesson_id = ?';
             params.push(lesson_id);
+            // For lessons, we usually show all questions
         } else if (module_id) {
             query += 'module_id = ? AND lesson_id IS NULL';
             params.push(module_id);
+
+            const [moduleRows] = await db.query('SELECT quiz_question_limit FROM modules WHERE id = ?', [module_id]);
+            limit = moduleRows.length > 0 ? (moduleRows[0].quiz_question_limit || 10) : 10;
         }
 
-        const [questions] = await db.query(query, params);
-        if (questions.length === 0) {
+        const [allQuestions] = await db.query(query, params);
+        if (allQuestions.length === 0) {
             return res.json({ score: 100, passed: true, message: 'No questions to evaluate.' });
         }
 
+        // Handle total count for grade calculation
+        // If it's a module quiz, use the limit or the total available if less than limit
+        const totalExpected = (module_id && !lesson_id) ? Math.min(limit, allQuestions.length) : allQuestions.length;
+
         let correctCount = 0;
-        questions.forEach(q => {
+        allQuestions.forEach(q => {
             if (answers[q.id] && answers[q.id].toUpperCase() === q.correct_option.toUpperCase()) {
                 correctCount++;
             }
         });
 
-        const grade = (correctCount / questions.length) * 100;
+        const grade = (correctCount / totalExpected) * 100;
         let passed = false;
 
         if (lesson_id) {
@@ -130,7 +149,7 @@ exports.submitQuiz = async (req, res) => {
             );
         }
 
-        res.json({ score: grade, passed, correct: correctCount, total: questions.length });
+        res.json({ score: grade, passed, correct: correctCount, total: totalExpected });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -14,6 +14,7 @@ const financeController = require('../controllers/finance');
 const quizController = require('../controllers/quiz');
 const dashboardController = require('../controllers/dashboard');
 const materialsController = require('../controllers/materials');
+const pdfController = require('../controllers/pdf');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -62,15 +63,28 @@ router.get('/students/:id/details', teacherMiddleware, userController.getStudent
 router.get('/students/:id/lesson/:lessonId/answers', teacherMiddleware, userController.getStudentLessonAnswers);
 
 // Course Management (Teacher & Coordinator & Admin)
-router.post('/modules', coordinatorMiddleware, courseController.createModule);
+router.post('/modules', coordinatorMiddleware, upload.single('thumbnail'), courseController.createModule);
+router.put('/modules/:id', coordinatorMiddleware, upload.single('thumbnail'), courseController.updateModule);
+router.delete('/modules/:id', coordinatorMiddleware, courseController.deleteModule);
 router.get('/modules', courseController.getModules); // Accessible by everyone (student included)
+
 router.post('/lessons', coordinatorMiddleware, upload.single('pdf'), courseController.createLesson);
+router.put('/lessons/:id', coordinatorMiddleware, upload.single('pdf'), courseController.updateLesson);
+router.delete('/lessons/:id', coordinatorMiddleware, courseController.deleteLesson);
+router.put('/lessons/reorder', coordinatorMiddleware, courseController.reorderLessons);
 
 // Video Upload (Teacher & Coordinator & Admin)
 router.post('/video/upload', coordinatorMiddleware, upload.single('video'), videoController.uploadVideo);
 
-// Student Progress
+// Student Progress and Dashboard
 router.post('/progress/:lessonId', courseController.markLessonCompleted);
+router.get('/student/dashboard', courseController.getStudentDashboard);
+router.post('/student/enroll/:moduleId', courseController.enrollCourse);
+
+// Student PDF Documents (Certificates and Receipts)
+router.get('/student/certificate/:moduleId', pdfController.generateCertificate);
+router.get('/student/receipt/charge/:chargeId', pdfController.generateReceipt);
+router.get('/student/receipt/enrollment/:moduleId', pdfController.generateEnrollmentReceipt);
 
 // Quizzes and Questions
 router.post('/questions', teacherMiddleware, quizController.addQuestion);
