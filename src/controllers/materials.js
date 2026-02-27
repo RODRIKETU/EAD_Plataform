@@ -21,7 +21,7 @@ exports.addMaterial = async (req, res) => {
             return res.status(400).json({ error: 'Nenhum arquivo enviado' });
         }
 
-        const filePath = `/uploads/${req.file.filename}`;
+        const filePath = `/uploads/materials/${req.file.filename}`;
 
         const [result] = await db.execute(
             'INSERT INTO support_materials (lesson_id, name, comment, file_path) VALUES (?, ?, ?, ?)',

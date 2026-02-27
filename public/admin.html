@@ -34,7 +34,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="/admin.html" class="flex items-center hover:opacity-80 transition">
-                        <img class="h-8 w-auto dynamic-logo object-contain" src="https://via.placeholder.com/150x50"
+                        <img class="h-8 w-auto dynamic-logo object-contain" src="https://placehold.co/150x50"
                             alt="Logo">
                         <span class="ml-4 font-bold text-xl dynamic-title dark:text-white">EAD</span>
                     </a>
@@ -45,9 +45,10 @@
                     <button onclick="window.toggleDarkMode && window.toggleDarkMode()"
                         class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white text-xl"
                         title="Alternar Modo Escuro">🌓</button>
-                    <a href="/profile.html"
-                        class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white">Meu
-                        Perfil</a>
+                    <a href="/profile.html" class="flex items-center space-x-2 group" title="Meu Perfil">
+                        <img class="h-9 w-9 object-cover rounded-full ring-2 ring-transparent group-hover:ring-primary/50 shadow-sm transition-all dynamic-avatar"
+                            src="https://ui-avatars.com/api/?name=U&background=random" alt="Meu Perfil">
+                    </a>
                     <button id="logout-btn" class="text-red-500 hover:text-red-400">Sair</button>
                 </div>
             </div>
@@ -56,29 +57,31 @@
 
     <div class="flex-1 max-w-7xl w-full mx-auto py-10 px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Sidebar -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 h-fit space-y-2 transition-colors duration-200">
+        <div
+            class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-4 h-fit space-y-2 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
             <button id="btn-dashboard"
-                class="w-full text-left px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded text-primary font-bold transition-colors"
+                class="w-full text-left px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-primary font-bold transition-all duration-200"
                 onclick="showTab('dashboard')">Dashboard</button>
             <button id="btn-courses"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded transition-colors"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-gray-600"
                 onclick="showTab('courses')">Cursos & Módulos</button>
             <button id="btn-grades"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded transition-colors"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-gray-600"
                 onclick="showTab('grades')">Notas e Aval. Módulos</button>
             <button id="btn-finance"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded transition-colors"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-gray-600"
                 onclick="showTab('finance')">Financeiro</button>
             <button id="btn-students"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded transition-colors"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-gray-600"
                 onclick="showTab('students')">Gestão de Alunos</button>
             <button id="btn-settings"
-                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded transition-colors"
+                class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-gray-600"
                 onclick="showTab('settings')">Config. White-Label</button>
         </div>
 
         <!-- Main Content -->
-        <div class="col-span-3 bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
+        <div
+            class="col-span-3 bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 md:p-8 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
 
             <!-- Dashboard Tab (Default) -->
             <div id="tab-dashboard">
@@ -91,10 +94,12 @@
 
                 <!-- Charts Area -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 border rounded p-4 h-80">
+                    <div
+                        class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl p-5 h-80">
                         <canvas id="chart-primary"></canvas>
                     </div>
-                    <div id="chart-secondary-container" class="bg-gray-50 border rounded p-4 h-80 hidden">
+                    <div id="chart-secondary-container"
+                        class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl p-5 h-80 hidden">
                         <canvas id="chart-secondary"></canvas>
                     </div>
                 </div>
@@ -102,10 +107,11 @@
 
             <!-- Courses Tab -->
             <div id="tab-courses" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Módulos do Curso</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Módulos do Curso</h2>
                     <button onclick="document.getElementById('module-modal').classList.remove('hidden')"
-                        class="bg-primary text-white px-3 py-1 rounded">+ Novo Módulo</button>
+                        class="bg-primary hover:opacity-90 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm text-white px-5 py-2 rounded-full font-medium">+
+                        Novo Módulo</button>
                 </div>
                 <div id="modules-list" class="space-y-4">
                     <!-- Modules injected here -->
@@ -180,11 +186,11 @@
 
             <!-- Finance Tab -->
             <div id="tab-finance" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Controle Financeiro</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Controle Financeiro</h2>
                     <button onclick="document.getElementById('charge-modal').classList.remove('hidden')"
-                        class="bg-primary text-white px-3 py-1 rounded hover:opacity-90 transition">+ Nova
-                        Cobrança</button>
+                        class="bg-primary hover:opacity-90 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm text-white px-5 py-2 rounded-full font-medium">+
+                        Nova Cobrança</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -214,53 +220,59 @@
 
             <!-- Settings Tab -->
             <div id="tab-settings" class="hidden">
-                <h2 class="text-xl font-bold mb-4">Configurações Base (White-Label)</h2>
-                <form id="settings-form" class="space-y-4">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Configurações Base (White-Label)
+                </h2>
+                <form id="settings-form" class="space-y-5 max-w-3xl">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome da
+                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Nome da
                             Plataforma</label>
                         <input type="text" id="set-platform-name"
-                            class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                            class="mt-1 block w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary transition-shadow">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo
+                            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Logo
                                 (Upload)</label>
                             <input type="file" id="set-logo" accept="image/*"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 dark:bg-gray-700 dark:text-white text-sm">
+                                class="mt-1 block w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary transition-shadow">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fundo do Login
+                            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Fundo do
+                                Login
                                 (Upload)</label>
                             <input type="file" id="set-login-bg" accept="image/*"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 dark:bg-gray-700 dark:text-white text-sm">
+                                class="mt-1 block w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary transition-shadow">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cor
+                            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Cor
                                 Primária</label>
                             <input type="color" id="set-primary-color"
-                                class="mt-1 block w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md">
+                                class="mt-1 block w-full h-12 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm cursor-pointer">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cor
+                            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Cor
                                 Secundária</label>
                             <input type="color" id="set-secondary-color"
-                                class="mt-1 block w-full h-10 border border-gray-300 dark:border-gray-600 rounded-md">
+                                class="mt-1 block w-full h-12 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm cursor-pointer">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Termos LGPD / Política
+                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Termos LGPD /
+                            Política
                             de Privacidade
-                            (Deixe vazio para desativar)</label>
+                            <span class="font-normal text-xs text-gray-400 ml-1">(Deixe vazio para
+                                desativar)</span></label>
                         <textarea id="set-lgpd-terms"
-                            class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 h-24 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
+                            class="mt-1 block w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 h-28 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary transition-shadow"
                             placeholder="Escreva aqui os termos que o usuário deverá aceitar para prosseguir no site..."></textarea>
                     </div>
-                    <button type="submit"
-                        class="bg-primary hover:opacity-90 transition text-white px-4 py-2 rounded">Salvar
-                        Configurações</button>
+                    <div class="pt-2">
+                        <button type="submit"
+                            class="bg-primary hover:opacity-90 transition-all duration-200 transform hover:-translate-y-0.5 shadow-md text-white px-6 py-2.5 rounded-full font-bold">Salvar
+                            Configurações</button>
+                    </div>
                 </form>
             </div>
 
@@ -268,49 +280,55 @@
     </div>
 
     <!-- Modal Module -->
-    <div id="module-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div id="module-modal"
+        class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
         <div
-            class="relative top-20 mx-auto p-5 border dark:border-gray-700 w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 transition-colors duration-200">
-            <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Novo Módulo</h3>
+            class="relative top-20 mx-auto p-6 border border-gray-200 dark:border-gray-700 w-96 shadow-xl rounded-xl bg-white dark:bg-gray-800 transition-colors duration-200">
+            <h3 class="text-xl font-bold mb-5 dark:text-gray-100">Novo Módulo</h3>
             <form id="module-form" class="space-y-4">
                 <input type="text" id="mod-title" placeholder="Título" required
-                    class="w-full border dark:border-gray-700 p-2 rounded dark:bg-gray-700 dark:text-gray-100">
+                    class="w-full border border-gray-200 dark:border-gray-600 p-2.5 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 outline-none">
                 <textarea id="mod-desc" placeholder="Descrição"
-                    class="w-full border dark:border-gray-700 p-2 rounded dark:bg-gray-700 dark:text-gray-100"></textarea>
-                <div class="flex justify-end space-x-2">
+                    class="w-full border border-gray-200 dark:border-gray-600 p-2.5 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 outline-none"></textarea>
+                <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" onclick="document.getElementById('module-modal').classList.add('hidden')"
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded hover:opacity-80 transition">Cancelar</button>
+                        class="px-5 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium">Cancelar</button>
                     <button type="submit"
-                        class="px-4 py-2 bg-primary text-white rounded hover:opacity-80 transition">Salvar</button>
+                        class="px-5 py-2 bg-primary text-white rounded-full hover:opacity-90 shadow-sm transition font-medium">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal Lesson -->
-    <div id="lesson-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div id="lesson-modal"
+        class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
         <div
-            class="relative top-20 mx-auto p-5 border dark:border-gray-700 w-96 shadow-lg rounded-md bg-white dark:bg-gray-800 transition-colors duration-200">
-            <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Nova Aula</h3>
+            class="relative top-20 mx-auto p-6 border border-gray-200 dark:border-gray-700 w-[28rem] shadow-xl rounded-xl bg-white dark:bg-gray-800 transition-colors duration-200">
+            <h3 class="text-xl font-bold mb-5 dark:text-gray-100">Nova Aula</h3>
             <form id="lesson-form" class="space-y-4">
                 <input type="hidden" id="les-mod-id">
                 <input type="text" id="les-title" placeholder="Título da Aula" required
-                    class="w-full border dark:border-gray-700 p-2 rounded dark:bg-gray-700 dark:text-gray-100">
+                    class="w-full border border-gray-200 dark:border-gray-600 p-2.5 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 outline-none">
+                <textarea id="les-desc" placeholder="Resumo, links extras ou descrição textual da aula" rows="3"
+                    class="w-full border border-gray-200 dark:border-gray-600 p-2.5 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 outline-none resize-y"></textarea>
                 <div>
-                    <label class="block text-sm text-gray-700 dark:text-gray-300">Aprovação Mínima (%)</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Aprovação Mínima
+                        (%) no Quiz</label>
                     <input type="number" id="les-min-score" min="0" max="100" value="70" required
-                        class="mt-1 w-full border dark:border-gray-700 p-2 rounded dark:bg-gray-700 dark:text-gray-100">
+                        class="w-full border border-gray-200 dark:border-gray-600 p-2.5 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-700 dark:text-gray-300">Vídeo (MP4 para conversão HLS)</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Vídeo (MP4 para
+                        conversão HLS)</label>
                     <input type="file" id="les-video" accept="video/mp4" required
-                        class="w-full border dark:border-gray-700 p-2 rounded dark:bg-gray-700 dark:text-gray-100 text-sm">
+                        class="w-full border border-gray-200 dark:border-gray-600 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 text-sm">
                 </div>
-                <div class="flex justify-end space-x-2">
+                <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" onclick="document.getElementById('lesson-modal').classList.add('hidden')"
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded hover:opacity-80 transition">Cancelar</button>
+                        class="px-5 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium">Cancelar</button>
                     <button type="submit" id="les-submit-btn"
-                        class="px-4 py-2 bg-primary text-white rounded hover:opacity-80 transition">Salvar</button>
+                        class="px-5 py-2 bg-primary text-white rounded-full hover:opacity-90 shadow-sm transition font-medium">Salvar</button>
                 </div>
             </form>
         </div>
@@ -512,6 +530,47 @@
             <div class="flex justify-end mt-6 pt-4 border-t dark:border-gray-700">
                 <button type="button" onclick="document.getElementById('student-modal').classList.add('hidden')"
                     class="px-4 py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded hover:opacity-80 transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Answers Details -->
+    <div id="answers-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-[60]">
+        <div
+            class="relative top-10 mx-auto p-5 border dark:border-gray-700 w-11/12 max-w-4xl shadow-lg rounded-xl bg-white dark:bg-gray-800 transition-colors duration-200">
+            <h3 class="text-2xl font-bold mb-4 dark:text-gray-100 border-b dark:border-gray-700 pb-3"
+                id="answers-modal-title">Respostas da Aula</h3>
+
+            <div class="overflow-y-auto max-h-96 pr-2 mb-4" id="answers-list-container">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="flex justify-end pt-4 border-t dark:border-gray-700">
+                <button type="button" onclick="document.getElementById('answers-modal').classList.add('hidden')"
+                    class="px-6 py-2 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded-lg shadow-sm hover:opacity-80 transition font-medium">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdf-modal"
+        class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[70]">
+        <div
+            class="relative top-10 mx-auto p-4 md:p-6 border border-gray-200 dark:border-gray-700 w-11/12 max-w-5xl h-[85vh] shadow-xl rounded-2xl bg-white dark:bg-gray-800 transition-colors duration-200 flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <h3 id="pdf-modal-title" class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight">
+                    Material de Apoio</h3>
+                <div class="flex space-x-3">
+                    <a id="pdf-download-btn" href="#" target="_blank"
+                        class="px-5 py-2 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-semibold rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors">Baixar
+                        Arquivo</a>
+                    <button type="button" onclick="closePdfModal()"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-3xl font-bold leading-none">&times;</button>
+                </div>
+            </div>
+            <div
+                class="flex-1 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                <iframe id="pdf-viewer" class="w-full h-full" src="" frameborder="0"></iframe>
             </div>
         </div>
     </div>

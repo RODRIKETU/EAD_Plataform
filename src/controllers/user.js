@@ -13,7 +13,7 @@ const bcrypt = require('bcrypt');
  */
 exports.getProfile = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT id, name, email, role, cpf, api_token, created_at FROM users WHERE id = ?', [req.user.id]);
+        const [rows] = await db.query('SELECT id, name, email, role, cpf, api_token, avatar_path, created_at FROM users WHERE id = ?', [req.user.id]);
         res.json(rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -40,6 +40,13 @@ exports.updateProfile = async (req, res) => {
             query += ', password_hash = ?';
             params.push(hash);
         }
+
+        if (req.file) {
+            const avatarPath = '/uploads/avatars/' + req.file.filename;
+            query += ', avatar_path = ?';
+            params.push(avatarPath);
+        }
+
         query += ' WHERE id = ?';
         params.push(req.user.id);
 
@@ -109,7 +116,8 @@ exports.getStudentDetails = async (req, res) => {
 
         // Progress
         const [progressRows] = await db.query(`
-            SELECT m.title as module_title, l.title as lesson_title, sp.is_completed, sp.completed_at
+            SELECT m.title as module_title, l.title as lesson_title, l.id as lesson_id, 
+                   sp.is_completed, sp.completed_at, sp.grade, sp.passed
             FROM student_progress sp
             JOIN lessons l ON sp.lesson_id = l.id
             JOIN modules m ON l.module_id = m.id
@@ -131,6 +139,61 @@ exports.getStudentDetails = async (req, res) => {
             progress: progressRows,
             grades: gradesRows
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
+ * @swagger
+ * /api/students/{id}/lesson/{lessonId}/answers:
+ *   get:
+ *     summary: Get a student's answers for a generic lesson
+ *     security:
+ *       - bearerAuth: []
+ */
+exports.getStudentLessonAnswers = async (req, res) => {
+    try {
+        const { id, lessonId } = req.params;
+
+        // Fetch user data & answers
+        const [progressRows] = await db.query(
+            'SELECT answers FROM student_progress WHERE student_id = ? AND lesson_id = ? AND is_completed = TRUE',
+            [id, lessonId]
+        );
+
+        if (progressRows.length === 0 || !progressRows[0].answers) {
+            return res.json([]);
+        }
+
+        const studentAnswers = typeof progressRows[0].answers === 'string'
+            ? JSON.parse(progressRows[0].answers)
+            : progressRows[0].answers;
+
+        // Fetch correct answers for the lesson
+        const [questions] = await db.query(
+            'SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option FROM questions WHERE lesson_id = ?',
+            [lessonId]
+        );
+
+        // Map what the student answered vs the actual correct question
+        const results = questions.map(q => {
+            const sAnswer = studentAnswers[q.id] || 'Não respondida';
+            return {
+                question_text: q.question_text,
+                options: {
+                    A: q.option_a,
+                    B: q.option_b,
+                    C: q.option_c,
+                    D: q.option_d,
+                },
+                student_answer: sAnswer,
+                correct_option: q.correct_option,
+                is_correct: sAnswer.toUpperCase() === q.correct_option.toUpperCase()
+            };
+        });
+
+        res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

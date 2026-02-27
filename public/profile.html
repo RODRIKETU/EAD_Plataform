@@ -27,7 +27,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <img class="h-8 w-auto dynamic-logo" src="https://via.placeholder.com/150x50" alt="Logo">
+                    <img class="h-8 w-auto dynamic-logo" src="https://placehold.co/150x50" alt="Logo">
                     <span class="ml-4 font-bold text-xl dynamic-title">EAD</span>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -41,9 +41,25 @@
     <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold mb-6">Meu Perfil</h1>
 
-        <div class="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 class="text-lg font-medium mb-4">Dados Pessoais</h2>
-            <form id="profile-form" class="space-y-4">
+        <div
+            class="bg-white shadow-sm rounded-xl border border-gray-100 p-6 md:p-8 mb-6 transition-colors duration-200">
+            <h2 class="text-xl font-bold mb-6 text-gray-800 tracking-tight">Dados Pessoais</h2>
+
+            <div class="flex flex-col sm:flex-row items-center sm:space-x-8 mb-8 pb-8 border-b border-gray-100">
+                <div class="shrink-0 mb-4 sm:mb-0 relative group">
+                    <img id="profile-avatar-preview"
+                        class="h-28 w-28 object-cover rounded-full ring-4 ring-indigo-50 shadow-md transition-all duration-300 group-hover:ring-primary/30"
+                        src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar">
+                </div>
+                <label class="block cursor-pointer">
+                    <span class="sr-only">Escolher foto de perfil</span>
+                    <input type="file" id="profile-avatar" accept="image/*"
+                        class="block w-full text-sm text-gray-500 file:cursor-pointer file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-primary hover:file:bg-indigo-100 transition-colors">
+                    <p class="mt-2 text-xs text-gray-400">JPG, GIF ou PNG. Máximo de 2MB.</p>
+                </label>
+            </div>
+
+            <form id="profile-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Nome</label>
                     <input type="text" id="profile-name"

@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('role', data.role);
+                    if (data.avatar_path) localStorage.setItem('avatar_path', data.avatar_path);
 
                     if (['super_admin', 'coordenador', 'professor'].includes(data.role)) {
                         window.location.href = '/admin.html';
@@ -39,7 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
+            localStorage.removeItem('avatar_path');
             window.location.href = '/';
+        });
+    }
+
+    // Apply global dynamic avatars
+    const savedAvatar = localStorage.getItem('avatar_path');
+    if (savedAvatar) {
+        document.querySelectorAll('.dynamic-avatar').forEach(img => {
+            img.src = savedAvatar;
         });
     }
 });

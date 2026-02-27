@@ -56,7 +56,7 @@ async function loadCourseStructure() {
                     <ul class="ml-2 mt-1 space-y-1">
                         ${m.lessons.map(l => `
                             <li>
-                                <button onclick="selectLesson(${l.id}, ${m.id}, '${l.title}', '${l.video_hls_path}', '${l.support_material_path}')" class="text-sm text-left hover:text-primary ${l.is_completed ? 'text-green-600' : 'text-gray-600'}">
+                                <button onclick="selectLesson(${l.id}, ${m.id}, '${l.title}', '${l.video_hls_path}', '${encodeURIComponent(l.description || '')}')" class="text-sm text-left hover:text-primary ${l.is_completed ? 'text-green-600' : 'text-gray-600'}">
                                     ${l.is_completed ? '✓' : '○'} ${l.title}
                                 </button>
                             </li>
@@ -69,7 +69,7 @@ async function loadCourseStructure() {
     } catch (err) { console.error(err); }
 }
 
-function selectLesson(id, moduleId, title, hlsPath) {
+function selectLesson(id, moduleId, title, hlsPath, encodedDesc) {
     currentLessonId = id;
     currentModuleId = moduleId;
 
@@ -78,6 +78,21 @@ function selectLesson(id, moduleId, title, hlsPath) {
     document.getElementById('lesson-title').classList.remove('hidden');
     document.getElementById('lesson-title').textContent = title;
     document.getElementById('lesson-actions').classList.remove('hidden');
+
+    // Handle Description
+    const descText = decodeURIComponent(encodedDesc || '').trim();
+    const descContainer = document.getElementById('lesson-desc-container');
+    const descContent = document.getElementById('lesson-desc-content');
+
+    if (descContainer && descContent) {
+        if (descText) {
+            descContent.innerHTML = descText.replace(/\n/g, '<br>');
+            descContainer.classList.remove('hidden');
+        } else {
+            descContainer.classList.add('hidden');
+            descContent.innerHTML = '';
+        }
+    }
 
     // Fetch and render Support Materials dynamically
     const materialsList = document.getElementById('materials-list');
@@ -97,7 +112,7 @@ function selectLesson(id, moduleId, title, hlsPath) {
                             <p class="font-bold text-gray-800 dark:text-gray-100 text-sm">${m.name}</p>
                             ${m.comment ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${m.comment}</p>` : ''}
                         </div>
-                        <a href="${m.file_path}" target="_blank" class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded hover:opacity-80 transition flex-shrink-0 ml-4 font-semibold text-center h-fit">Baixar PDF</a>
+                        <button onclick="openPdfModal('${m.file_path}', '${m.name.replace(/'/g, "\\'")}')" class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-4 py-2 rounded-lg hover:bg-indigo-200 transition-colors flex-shrink-0 ml-4 font-bold text-center h-fit">Ler Material</button>
                     </div>
                 `).join('');
             });
@@ -176,13 +191,15 @@ function openQuizModal(type, id, questions) {
 
     const container = document.getElementById('quiz-container');
     container.innerHTML = questions.map((q, index) => `
-        <div class="border-b dark:border-gray-700 mb-4 pb-2" data-qid="${q.id}">
-            <p class="font-bold mb-2">${index + 1}. ${q.question_text}</p>
-            <div class="space-y-1 pl-4">
-                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="A" class="mr-2"> A) ${q.option_a}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="B" class="mr-2"> B) ${q.option_b}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="C" class="mr-2"> C) ${q.option_c}</label>
-                <label class="block cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded transition-colors"><input type="radio" name="q-${q.id}" value="D" class="mr-2"> D) ${q.option_d}</label>
+        <div class="question-block bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-200 mb-5" data-qid="${q.id}">
+            <p class="font-bold mb-4 text-gray-800 dark:text-gray-100 text-lg leading-snug"><span class="text-primary mr-1">${index + 1}.</span> ${q.question_text}</p>
+            <div class="space-y-3 pl-2">
+                ${['A', 'B', 'C', 'D'].map(opt => `
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-transparent hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600 cursor-pointer transition-all">
+                        <input type="radio" name="q-${q.id}" value="${opt}" class="w-5 h-5 text-primary focus:ring-primary border-gray-300">
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">${q['option_' + opt.toLowerCase()]}</span>
+                    </label>
+                `).join('')}
             </div>
         </div>
     `).join('');
@@ -252,4 +269,18 @@ async function submitQuiz() {
             }
         }
     } catch (err) { console.error(err); }
+}
+
+// --- PDF Modal logic
+
+function openPdfModal(pdfUrl, title) {
+    document.getElementById('pdf-modal-title').textContent = title || 'Material de Apoio';
+    document.getElementById('pdf-viewer').src = pdfUrl;
+    document.getElementById('pdf-download-btn').href = pdfUrl;
+    document.getElementById('pdf-modal').classList.remove('hidden');
+}
+
+function closePdfModal() {
+    document.getElementById('pdf-modal').classList.add('hidden');
+    document.getElementById('pdf-viewer').src = '';
 }

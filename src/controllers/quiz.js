@@ -110,6 +110,14 @@ exports.submitQuiz = async (req, res) => {
             const [lesson] = await db.query('SELECT min_pass_score FROM lessons WHERE id = ?', [lesson_id]);
             const minScore = lesson.length > 0 && lesson[0].min_pass_score !== null ? lesson[0].min_pass_score : 70;
             passed = grade >= minScore;
+
+            // Save lesson progress with grade and answers
+            await db.query(
+                `INSERT INTO student_progress (student_id, lesson_id, is_completed, completed_at, grade, passed, answers) 
+                 VALUES (?, ?, TRUE, NOW(), ?, ?, ?) 
+                 ON DUPLICATE KEY UPDATE is_completed = TRUE, completed_at = NOW(), grade = ?, passed = ?, answers = ?`,
+                [req.user.id, lesson_id, grade, passed, JSON.stringify(answers), grade, passed, JSON.stringify(answers)]
+            );
         } else {
             passed = grade >= 70; // Static module threshold for now
         }

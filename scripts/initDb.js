@@ -38,6 +38,7 @@ async function initDb() {
         role ENUM('aluno', 'professor', 'coordenador', 'super_admin') NOT NULL DEFAULT 'aluno',
         cpf VARCHAR(14) UNIQUE,
         api_token VARCHAR(255) UNIQUE,
+        avatar_path VARCHAR(255) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -52,6 +53,7 @@ async function initDb() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         module_id INT,
         title VARCHAR(255) NOT NULL,
+        description TEXT,
         video_hls_path VARCHAR(255),
         support_material_path VARCHAR(255),
         display_order INT DEFAULT 0,
@@ -101,6 +103,7 @@ async function initDb() {
         module_id INT,
         grade DECIMAL(5,2),
         passed BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
         UNIQUE KEY student_module (student_id, module_id)

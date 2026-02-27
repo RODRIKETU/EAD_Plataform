@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
         if (file.fieldname === 'video') folder += 'raw_videos/';
         else if (file.fieldname === 'pdf' || file.fieldname === 'material') folder += 'materials/';
         else if (file.fieldname === 'logo') folder += 'logos/';
-        else if (file.fieldname === 'login_bg') folder += 'backgrounds/';
+        else if (file.fieldname === 'avatar') folder += 'avatars/';
         else folder += 'misc/';
 
         if (!fs.existsSync(folder)) {
@@ -45,7 +45,7 @@ router.use(authMiddleware);
 
 // Profile & User
 router.get('/profile', userController.getProfile);
-router.put('/profile', userController.updateProfile);
+router.put('/profile', upload.single('avatar'), userController.updateProfile);
 
 // Admin Only Settings
 router.put('/settings', superAdminMiddleware, upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'login_bg', maxCount: 1 }]), settingsController.updateSettings);
@@ -59,6 +59,7 @@ router.post('/user/generate-token', superAdminMiddleware, userController.generat
 // Student Management (Teacher & Coordinator & Admin)
 router.get('/students', teacherMiddleware, userController.getStudents);
 router.get('/students/:id/details', teacherMiddleware, userController.getStudentDetails);
+router.get('/students/:id/lesson/:lessonId/answers', teacherMiddleware, userController.getStudentLessonAnswers);
 
 // Course Management (Teacher & Coordinator & Admin)
 router.post('/modules', coordinatorMiddleware, courseController.createModule);

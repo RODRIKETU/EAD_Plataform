@@ -31,18 +31,23 @@ exports.getMetrics = async (req, res) => {
             const [avgGradeRes] = await db.query('SELECT AVG(grade) as average FROM student_grades');
             metrics.averageGrade = avgGradeRes[0].average ? parseFloat(avgGradeRes[0].average).toFixed(1) : 0;
 
-            const [moduleRates] = await db.query(`
-                SELECT m.title, 
-                       COUNT(sg.id) as total_evals, 
-                       SUM(CASE WHEN sg.passed = TRUE THEN 1 ELSE 0 END) as passed_count 
-                FROM modules m 
-                LEFT JOIN student_grades sg ON m.id = sg.module_id 
-                GROUP BY m.id
+            // Module engagement: views vs completions
+            const [moduleEngagementRes] = await db.query(`
+                SELECT m.title,
+                       (SELECT COUNT(DISTINCT sp.student_id) 
+                        FROM student_progress sp 
+                        JOIN lessons l ON sp.lesson_id = l.id 
+                        WHERE l.module_id = m.id) as views,
+                       (SELECT COUNT(DISTINCT sg.student_id) 
+                        FROM student_grades sg 
+                        WHERE sg.module_id = m.id AND sg.passed = TRUE) as completions
+                FROM modules m
             `);
 
-            metrics.moduleCompletionRates = moduleRates.map(m => ({
+            metrics.moduleEngagement = moduleEngagementRes.map(m => ({
                 title: m.title,
-                rate: m.total_evals > 0 ? ((m.passed_count / m.total_evals) * 100).toFixed(1) : 0
+                views: m.views || 0,
+                completions: m.completions || 0
             }));
 
             if (role === 'coordenador') {
