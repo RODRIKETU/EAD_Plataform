@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFree = document.getElementById('mod-is-free').checked;
         const price = document.getElementById('mod-price').value;
         const quizLimit = document.getElementById('mod-quiz-limit').value || 10;
-        const thumbnail = document.getElementById('mod-thumbnail').files[0];
+        const thumbnail = document.getElementById('mod-thumbnail')?.files?.[0];
 
         const fd = new FormData();
         fd.append('title', title);
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFree = document.getElementById('edit-mod-is-free').checked;
         const price = document.getElementById('edit-mod-price').value;
         const quizLimit = document.getElementById('edit-mod-quiz-limit').value || 10;
-        const thumbnail = document.getElementById('edit-mod-thumbnail').files[0];
+        const thumbnail = document.getElementById('edit-mod-thumbnail')?.files?.[0];
 
         const fd = new FormData();
         fd.append('title', title);
@@ -131,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = document.getElementById('les-title').value;
         const descTitle = document.getElementById('les-desc-title').value;
         const desc = document.getElementById('les-desc').value;
-        const videoInput = document.getElementById('les-video').files[0];
-        const pdfInput = document.getElementById('les-pdf').files[0];
+        const videoInput = document.getElementById('les-video')?.files?.[0];
+        const pdfInput = document.getElementById('les-pdf')?.files?.[0];
         const submitBtn = document.getElementById('les-submit-btn');
 
         submitBtn.disabled = true;
