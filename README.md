@@ -24,9 +24,11 @@ Plataforma EAD completa com suporte a arquitetura White-Label, processamento de 
    ```bash
    npm run init-db
    ```
-   **Credenciais Padrão Criadas:**
-   - **Admin:** `admin@ead.com` | Senha: `admin123`
-   - **Aluno:** `aluno@ead.com` | Senha: `student123`
+    **Credenciais de Teste (Senha: 123 para todos):**
+    - **Super Admin:** `admin@ead.com`
+    - **Coordenador:** `coordenador@ead.com`
+    - **Professor:** `professor@ead.com`
+    - **Aluno:** `aluno@ead.com`
 5. Inicie o Servidor:
    ```bash
    npm run dev
